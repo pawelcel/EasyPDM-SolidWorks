@@ -1,6 +1,6 @@
-// The add-in's texts in English, Polish and German, chosen by the Windows display language as
-// the macros choose theirs (GetUserDefaultUILanguage there, CurrentUICulture here). The English
-// text is the key; a text missing from a table is shown in English.
+// The add-in's texts in English, Polish and German, in SOLIDWORKS' own language (English when
+// "Use English language menus" is ticked, whatever Windows is in), as the macros choose theirs.
+// The English text is the key; a text missing from a table is shown in English.
 
 using System.Collections.Generic;
 using System.Globalization;
@@ -125,10 +125,13 @@ namespace EasyPDM.SolidWorksAddin
             ["Could not create the EasyPDM menu: {0}"] = "Das EasyPDM-Menü konnte nicht erstellt werden: {0}",
         };
 
-        private static readonly Dictionary<string, string> Table =
-            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "pl" ? Pl
-            : CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de" ? De
-            : null;
+        // Windows' display language until Use() is told SOLIDWORKS' own.
+        private static Dictionary<string, string> Table = For(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
+
+        private static Dictionary<string, string> For(string code) => code == "pl" ? Pl : code == "de" ? De : null;
+
+        /// "pl", "de" or anything else for English.
+        public static void Use(string code) => Table = For(code);
 
         public static string T(string english, params object[] values)
         {

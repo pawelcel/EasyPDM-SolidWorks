@@ -17,6 +17,6 @@ and the drawing sheet were released with EasyPDM itself; see the
 - **Upload and Download sign in through the browser first** when there is no valid login, instead of the macros asking for a login and password; the macros' own password login remains only for EasyPDM servers before 0.9.
 - **The macros sign in through the browser too** when their login is missing or expired, Upload and Download alike, instead of asking for a login and password; the password login remains for EasyPDM servers before 0.9.
 - The add-in writes what it asked the server and decided to `%TEMP%\EasyPDM_addin.log`, beside the macros' logs.
-- English, Polish and German, by the Windows display language.
+- English, Polish and German, in SOLIDWORKS' own language (English when "Use English language menus" is ticked); the macros now follow it too instead of the Windows display language.
 - **Version stamp on every upload.** The Upload macro writes a new `EasyPDM_ContentVersion` custom property into the part or assembly before sending it, and sends it along, so EasyPDM (0.9.1 or later for files copied into its shared storage) can tell a copy of that upload from an older or a changed one, also after SolidWorks saves the file again unchanged.
 - **A repository of its own**, moved out of EasyPDM (`EasyPDM.SolidWorks/`) with its history.

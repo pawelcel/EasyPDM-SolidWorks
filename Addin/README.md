@@ -45,7 +45,8 @@ A .NET Framework 4.8 class library (what SOLIDWORKS loads), COM-visible, impleme
 embedded, so the add-in ships none of them and binds to the installed SOLIDWORKS. It builds on
 Linux too (`dotnet build -c Release`), which is how the release workflow builds it.
 
-Texts are in English, Polish and German, by the Windows display language, as in the macros.
+Texts are in English, Polish and German, in SOLIDWORKS' language (English when "Use English language menus"
+is ticked), as in the macros.
 Icons are drawn at start-up into `%LOCALAPPDATA%\EasyPDM\SolidWorks`.
 
 ## Status

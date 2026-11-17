@@ -161,7 +161,7 @@ Private Const SW_CUSTOM_INFO_TEXT As Long = 30              ' swCustomInfoType_e
 Private Const SW_CUSTOM_PROPERTY_REPLACE As Long = 2        ' swCustomPropertyAddOption_e.swCustomPropertyReplaceValue
 ' Bumped by hand on every change and written into the first log line, so a log shows at once
 ' whether the latest macro was imported or an older copy ran (happened twice in testing).
-Private Const MACRO_REVISION As String = "2026-11-17.3"
+Private Const MACRO_REVISION As String = "2026-11-17.4"
 Private Const SW_SAVE_AS_SILENT As Long = 1                 ' swSaveAsOptions_e.swSaveAsOptions_Silent -- UNVERIFIED against a
                                                              ' live SolidWorks install, confirm on first real test (see
                                                              ' UploadStepAttachment).
@@ -267,9 +267,40 @@ Private Const VK_ESCAPE As Long = &H1B
 
 Private g_Lang As String
 
+' SOLIDWORKS' own language first: "Use English language menus" (swUseEnglishLanguage, 83)
+' means English whatever Windows is in, and GetCurrentLanguage names the language of its
+' menus otherwise -- a macro speaking another language than the program around it looks
+' broken. Windows' display language only when SOLIDWORKS cannot be asked.
 Private Function DetectLanguage() As String
     Dim langId As Integer
     Dim primaryLang As Integer
+    Dim swHost As Object
+    Dim swLanguage As String
+    swLanguage = ""
+    On Error Resume Next
+    Set swHost = Application.SldWorks
+    If Not swHost Is Nothing Then
+        If swHost.GetUserPreferenceToggle(83) Then
+            DetectLanguage = "en"
+            Exit Function
+        End If
+        swLanguage = LCase(swHost.GetCurrentLanguage())
+    End If
+    Err.Clear
+    On Error GoTo 0
+    Select Case swLanguage
+        Case "polish"
+            DetectLanguage = "pl"
+            Exit Function
+        Case "german"
+            DetectLanguage = "de"
+            Exit Function
+        Case ""
+            ' not known: Windows below
+        Case Else
+            DetectLanguage = "en"
+            Exit Function
+    End Select
     On Error GoTo Fallback
     langId = GetUserDefaultUILanguage()
     primaryLang = langId And &H3FF

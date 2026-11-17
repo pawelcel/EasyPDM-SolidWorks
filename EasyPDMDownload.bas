@@ -139,9 +139,40 @@ Private gProgressPrevKey As String
 ' starcie main, bo zmienne modulu potrafia przezyc miedzy uruchomieniami makra.
 Private gCancelledFromBrowser As Boolean
 
+' SOLIDWORKS' own language first: "Use English language menus" (swUseEnglishLanguage, 83)
+' means English whatever Windows is in, and GetCurrentLanguage names the language of its
+' menus otherwise -- a macro speaking another language than the program around it looks
+' broken. Windows' display language only when SOLIDWORKS cannot be asked.
 Private Function DetectLanguage() As String
     Dim langId As Integer
     Dim primaryLang As Integer
+    Dim swHost As Object
+    Dim swLanguage As String
+    swLanguage = ""
+    On Error Resume Next
+    Set swHost = Application.SldWorks
+    If Not swHost Is Nothing Then
+        If swHost.GetUserPreferenceToggle(83) Then
+            DetectLanguage = "en"
+            Exit Function
+        End If
+        swLanguage = LCase(swHost.GetCurrentLanguage())
+    End If
+    Err.Clear
+    On Error GoTo 0
+    Select Case swLanguage
+        Case "polish"
+            DetectLanguage = "pl"
+            Exit Function
+        Case "german"
+            DetectLanguage = "de"
+            Exit Function
+        Case ""
+            ' not known: Windows below
+        Case Else
+            DetectLanguage = "en"
+            Exit Function
+    End Select
     On Error GoTo Fallback
     langId = GetUserDefaultUILanguage()
     primaryLang = langId And &H3FF

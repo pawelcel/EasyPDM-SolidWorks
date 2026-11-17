@@ -59,6 +59,7 @@ namespace EasyPDM.SolidWorksAddin
         {
             _sw = (ISldWorks)ThisSW;
             _sw.SetAddinCallbackInfo2(0, this, Cookie);
+            Texts.Use(Language());
             _commands = _sw.GetCommandManager(Cookie);
             Icons.Paths icons = null;
             try
@@ -95,6 +96,22 @@ namespace EasyPDM.SolidWorksAddin
             GC.Collect();
             GC.WaitForPendingFinalizers();
             return true;
+        }
+
+        /// SOLIDWORKS' language: English when "Use English language menus" is ticked, otherwise
+        /// the language of its menus; Windows' only when SOLIDWORKS cannot be asked.
+        private string Language()
+        {
+            try
+            {
+                if (_sw.GetUserPreferenceToggle((int)swUserPreferenceToggle_e.swUseEnglishLanguage)) return "en";
+                var name = (_sw.GetCurrentLanguage() ?? "").ToLowerInvariant();
+                if (name == "polish") return "pl";
+                if (name == "german") return "de";
+                if (name.Length > 0) return "en";
+            }
+            catch { /* below */ }
+            return System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
         }
 
         internal ModelDoc2 ActiveModel
