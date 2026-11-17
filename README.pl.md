@@ -2,6 +2,8 @@
 
 [English](README.md) | **Polski** | [Deutsch](README.de.md)
 
+[![Postaw kawę na buycoffee.to](https://img.shields.io/badge/☕_Postaw_kawę-buycoffee.to-FFDD00?style=for-the-badge)](https://buycoffee.to/easypdm)
+
 Część [EasyPDM](https://github.com/pawelcel/EasyPDM) (małego PDM-u na własnym serwerze) dla
 SolidWorksa: dodatek z zakładką EasyPDM we wstążce ([`Addin/`](Addin/README.md)), makra Upload i
 Download, które uruchamia, oraz arkusz rysunkowy EasyPDM. Do wersji 0.9 były w repozytorium

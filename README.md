@@ -2,6 +2,8 @@
 
 **English** | [Polski](README.pl.md) | [Deutsch](README.de.md)
 
+[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="136">](https://buymeacoffee.com/easypdm)
+
 The SolidWorks side of [EasyPDM](https://github.com/pawelcel/EasyPDM), a small, self-hosted PDM:
 an add-in with an EasyPDM tab in the CommandManager ([`Addin/`](Addin/README.md)), the Upload and
 Download macros it runs, and the EasyPDM drawing sheet. Until 0.9 they lived in the EasyPDM
