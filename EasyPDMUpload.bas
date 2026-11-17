@@ -161,7 +161,7 @@ Private Const SW_CUSTOM_INFO_TEXT As Long = 30              ' swCustomInfoType_e
 Private Const SW_CUSTOM_PROPERTY_REPLACE As Long = 2        ' swCustomPropertyAddOption_e.swCustomPropertyReplaceValue
 ' Bumped by hand on every change and written into the first log line, so a log shows at once
 ' whether the latest macro was imported or an older copy ran (happened twice in testing).
-Private Const MACRO_REVISION As String = "2026-11-17.2"
+Private Const MACRO_REVISION As String = "2026-11-17.3"
 Private Const SW_SAVE_AS_SILENT As Long = 1                 ' swSaveAsOptions_e.swSaveAsOptions_Silent -- UNVERIFIED against a
                                                              ' live SolidWorks install, confirm on first real test (see
                                                              ' UploadStepAttachment).
@@ -880,8 +880,17 @@ End Function
 ' request (we don't rely on automatic cookie handling by the COM component).
 ' ============================================================================
 
+' ServerXMLHTTP (WinHTTP), not XMLHTTP (WinINet): WinINet keeps a cookie jar shared with
+' Internet Explorer and adds its cookies to every request. The password login
+' (/auth/macro-login) answers with a pdm_session cookie, which WinINet kept and sent beside
+' the token this macro sets by hand -- so after a browser sign-in (token in the body only)
+' the server got the old, revoked token as well and answered 401 (seen on SolidWorks 2026).
+' WinHTTP has no shared jar and no cache, so the token sent is always the stored one.
+' Timeouts (ms): resolve, connect, send, receive -- longer than WinHTTP's 30 s defaults, for
+' big files on a slow link.
 Private Function NewHttpRequest() As Object
-    Set NewHttpRequest = CreateObject("MSXML2.XMLHTTP.6.0")
+    Set NewHttpRequest = CreateObject("MSXML2.ServerXMLHTTP.6.0")
+    NewHttpRequest.setTimeouts 0, 60000, 600000, 600000
 End Function
 
 ' Used ONLY by ApiUploadFile (binary/multipart body) -- see the comment there for why plain
