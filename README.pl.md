@@ -25,8 +25,8 @@ między sobą poza współdzielonym miejscem w rejestrze Windows na sesję logow
 
 - **`EasyPDMUpload.bas`** — wysyła aktywny dokument SolidWorks do EasyPDM. Wybór
   projektu/nowy-czy-istniejący/duplikuj/właściwości elementu odbywa się w przeglądarce
-  (ten sam wzorzec co makra FreeCAD), poza jednym wyjątkiem — patrz "Różnice względem
-  makr FreeCAD" niżej.
+  (ten sam wzorzec co dodatek FreeCAD), poza jednym wyjątkiem — patrz "Różnice względem
+  dodatku FreeCAD" niżej.
 - **`EasyPDMDownload.bas`** — pobiera Część/Złożenie z EasyPDM (wraz ze wszystkimi
   składnikami złożenia) i otwiera je w SolidWorks; wybór KTÓREGO elementu też odbywa się
   w przeglądarce.
@@ -47,7 +47,10 @@ niżej po konkretne błędy znalezione tym sposobem.
 Kilka wąskich, rzadko używanych fragmentów kodu pozostaje faktycznie nieprzetestowanych
 w praktyce (oznaczone `UNVERIFIED` bezpośrednio w kodzie) — zob. "Znane ryzyka" niżej.
 
-## Różnice względem makr FreeCAD
+Ponownie uruchomione na SOLIDWORKS 2024 SP5 17.11.2026, przez dodatek: Upload, Download,
+logowanie przez przeglądarkę, znacznik wersji i język zgodny z SOLIDWORKS.
+
+## Różnice względem dodatku FreeCAD
 
 To **odpowiedniki**, nie port 1:1 — VBA nie ma wbudowanego JSON ani okien dialogowych bez
 osobnych plików binarnych (SolidWorks/VBA UserForm), więc kilka rzeczy jest rozwiązanych
@@ -65,7 +68,7 @@ inaczej:
   Escape jest jedynym dostępnym gestem anulowania.
 - **Wybór projektu/nowy-czy-istniejący/duplikuj/właściwości elementu w przeglądarce** —
   ten sam wzorzec bilet+`GET /api/auth/browser-login`+popup "oczekujące żądanie z makra
-  CAD" co makra FreeCAD, **z jednym świadomym wyjątkiem**: jeśli dokument jest JUŻ
+  CAD" co dodatek FreeCAD, **z jednym świadomym wyjątkiem**: jeśli dokument jest JUŻ
   podpięty do elementu PDM (patrz punkt niżej), makro NIE otwiera przeglądarki wcale —
   pyta lokalnie (natywny `MsgBox`) o zgodę na nową rewizję, plus czy eksportować STEP
   i/lub PDF (patrz niżej), dokładnie jak przed tą zmianą. SolidWorks zna wtedy element ze
@@ -98,12 +101,17 @@ inaczej:
 
 ## Co robi `EasyPDMUpload.bas`
 
-1. **Logowanie** — przy pierwszym uruchomieniu (albo gdy zapisana sesja wygasła/została
-   unieważniona) pyta o adres API, nazwę użytkownika i hasło. Token sesji zapisywany jest
-   w rejestrze Windows (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`)
-   przez wbudowane `SaveSetting`/`GetSetting` — kolejne uruchomienia (także po restarcie
-   SolidWorks, także z `EasyPDMDownload.bas` — sesja jest współdzielona) nie proszą o
-   ponowne logowanie, dopóki sesja jest ważna (30 dni).
+1. **Logowanie** — przy pierwszym uruchomieniu (albo gdy zapisane logowanie wygasło lub
+   zostało unieważnione) loguje przez przeglądarkę: pyta o adres serwera, otwiera EasyPDM z
+   kodem, a po kliknięciu tam Zezwól i OK w SolidWorks ma własny token makra; hasło nie
+   przechodzi przez SolidWorks. Tylko serwer EasyPDM starszy niż 0.9, który nie ma logowania
+   przez przeglądarkę, sprawia, że pyta zamiast tego o nazwę użytkownika i hasło. Token
+   zapisywany jest w rejestrze Windows
+   (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`) przez wbudowane
+   `SaveSetting`/`GetSetting` — kolejne uruchomienia (także po restarcie SolidWorks, także z
+   `EasyPDMDownload.bas` i z dodatku — logowanie jest wspólne) nie proszą o ponowne
+   logowanie, dopóki token jest ważny (rok, o ile nie zostanie unieważniony w Ustawienia →
+   Użytkownicy).
 2. **Zapisuje aktywny dokument**, jeśli jeszcze nie był zapisany (standardowe okno "Zapisz
    jako" SolidWorks).
 3. **Jeśli aktywny dokument to Złożenie**: najpierw rozwiązuje wszystkie komponenty
@@ -120,7 +128,7 @@ inaczej:
    zwróci się uwagi na to podsumowanie. Po potwierdzeniu przechodzi liśćmi najpierw (ten
    dokument na końcu); dla każdego JESZCZE niepodpiętego komponentu otwiera własny bilet
    w przeglądarce (ten sam wybór Nowy/Duplikuj/Dograj do istniejącego co dokument główny,
-   pokazywany w już otwartej karcie — patrz "Różnice względem makr FreeCAD").
+   pokazywany w już otwartej karcie — patrz "Różnice względem dodatku FreeCAD").
    Nowo utworzone komponenty dostają własny eksport STEP/PDF (wg wyboru checkboxa tego
    konkretnego komponentu w przeglądarce) i wpis `EasyPDM_ItemId`, i są automatycznie
    podpinane pod swojego rodzica w strukturze BOM. **Już podpięte komponenty** są podpinane do
@@ -143,7 +151,7 @@ inaczej:
 4. Sprawdza **Właściwości niestandardowe** dokumentu głównego:
    - **Już podpięty** (ma zapisane `EasyPDM_ItemId`) — pyta lokalnie o zgodę na dogranie
      bieżącej wersji jako nowej rewizji, bez otwierania przeglądarki (patrz "Różnice
-     względem makr FreeCAD"), a potem jeszcze dwa natywne pytania Tak/Nie o eksport STEP
+     względem dodatku FreeCAD"), a potem jeszcze dwa natywne pytania Tak/Nie o eksport STEP
      (domyślnie Tak) i PDF (domyślnie Nie).
    - **Jeszcze niepodpięty** — otwiera przeglądarkę systemową (już zalogowaną, most
      token→ciasteczko) na popupie "oczekujące żądanie z makra CAD", z trzema opcjami do
@@ -166,9 +174,14 @@ inaczej:
      nie wysyła mimo to (to był realny, naprawiony błąd: recenzowanie elementu i ciche
      zresetowanie go przez ponowną wysyłkę spod nóg recenzenta). Osoba recenzująca musi
      najpierw sama przenieść element poza status "Sprawdzany" w aplikacji webowej.
-5. **Kopiuje** bieżący plik dokumentu do PDM pod nazwą `numer (nazwa).REWIZJA.rozszerzenie`
-   (ta sama konwencja co w aplikacji webowej i makrach FreeCAD). **Lokalny plik NIE jest
-   ruszany** — nie jest ani przenoszony, ani usuwany. Jeśli magazyn PDM jest widoczny
+5. **Zapisuje dokument pod nazwą z PDM** `numer (nazwa).REWIZJA.rozszerzenie` (ta sama
+   konwencja co w aplikacji webowej i dodatku FreeCAD) w folderze docelowym, o który pytał
+   Upload, i **kopiuje** ten plik do PDM. Plik, pod którym dokument był zapisany wcześniej,
+   zostaje na dysku — nie jest ani przenoszony, ani usuwany. Przed tym zapisem część lub
+   złożenie dostaje nowy **znacznik wersji**, właściwość `EasyPDM_ContentVersion`, wysyłany
+   razem z plikiem: dzięki niemu EasyPDM odróżnia dokładnie ten upload od starszej albo
+   zmienionej lokalnie kopii, także po ponownym zapisie pliku przez SolidWorks bez zmian — na
+   tym opiera się sprawdzanie nieaktualnych komponentów w dodatku. Jeśli magazyn PDM jest widoczny
    z tej maszyny (`GET /api/config`), kopia trafia do wspólnego `storage/components/` i
    jest **rejestrowana** bez ponownego przesyłania przez HTTP; jeśli nie (typowe, gdy SolidWorks i usługa EasyPDM działają jako różni
    użytkownicy Windows — magazyn jest w `C:\ProgramData\...`, do którego zwykły
@@ -186,7 +199,8 @@ inaczej:
    podgląd 3D (STEP) w aplikacji webowej. Błąd eksportu (np. brak widocznej geometrii)
    NIE przerywa reszty operacji.
 7. Zapisuje `EasyPDM_ItemId`/`EasyPDM_ItemNumber` we Właściwościach niestandardowych
-   dokumentu i pokazuje potwierdzenie.
+   dokumentu. Raport z biegu (co poszło, co się nie udało) trafia do powiadomień w aplikacji
+   webowej, a nie do okna w SolidWorks.
 
 ## Co robi `EasyPDMDownload.bas`
 
@@ -220,12 +234,12 @@ bierze po prostu najnowiej wgrany załącznik.
 
 Trzy niezależne sposoby, od najszybszego do najbardziej szczegółowego:
 
-1. **Komunikat na końcu** — po udanej operacji makro pokazuje okno z podsumowaniem (np.
-   "Wysłano do EasyPDM: element #67 (rewizja B)." albo log pobierania). Okno z "Błąd: ..."
-   oznacza, że coś nie wyszło.
-2. **Aplikacja webowa** — najpewniejszy dowód dla uploadu: wejdź w projekt (albo "Cała
-   baza"), znajdź element po numerze z komunikatu i sprawdź, czy ma dołączony plik (panel
-   właściwości → Załączniki) i poprawne właściwości.
+1. **Aplikacja webowa w trakcie** — lista transferu po prawej odhacza kolejne pliki, a na
+   końcu w dzwonku (powiadomienia) jest raport: ile plików poszło lub przyszło, które się nie
+   udały, które pominięto. Okno z "Błąd: ..." w SolidWorks oznacza, że coś nie wyszło.
+2. **Sam element** — najpewniejszy dowód dla uploadu: wejdź w projekt (albo "Cała baza"),
+   znajdź element i sprawdź, czy ma dołączony plik (panel właściwości → Załączniki) i
+   poprawne właściwości.
 3. **Log makra** — każde uruchomienie dopisuje (nie nadpisuje) szczegółowy, ostemplowany
    czasem przebieg do zwykłego pliku tekstowego (osobny plik dla każdego makra, żeby się
    nie mieszały):
@@ -243,7 +257,7 @@ Trzy niezależne sposoby, od najszybszego do najbardziej szczegółowego:
 
 ## Instalacja
 
-SolidWorks nie ma formatu makra czysto tekstowego (jak `.FCMacro` we FreeCAD) — makra to
+SolidWorks nie ma formatu makra czysto tekstowego (jak Python we FreeCAD) — makra to
 projekty VBA. `.bas` to standardowy format eksportu/importu **modułu** VBA (nie całego
 projektu makra), więc dla KAŻDEGO z dwóch plików osobno:
 
@@ -285,8 +299,8 @@ Polecenia → Makro**, przeciągnij „Nowy przycisk makra” na pasek cztery ra
 
 **Zaloguj** (`LoginInBrowser`, serwery EasyPDM od 0.9) pyta o adres serwera, otwiera EasyPDM w
 przeglądarce z kodem, a po kliknięciu tam Zezwól i OK w SolidWorks zapisuje własny token makra
-— hasło nie przechodzi przez SolidWorks. Dotychczasowe logowanie loginem i hasłem przy starcie
-makra Upload nadal działa, a dla starszych serwerów jest jedynym.
+— hasło nie przechodzi przez SolidWorks. Upload i Download same uruchamiają to logowanie, gdy
+nie ma ważnego; tylko dla serwerów starszych niż 0.9 pytają zamiast tego o login i hasło.
 
 ## Historia naprawionych problemów
 
@@ -316,8 +330,8 @@ tej samej, już poprawionej infrastruktury):
    sobie nadal zawodziło na prawdziwym uploadzie z ogólnym błędem "BRAK POŁĄCZENIA".
    Faktyczna naprawa: `ApiUploadFile` przełączono konkretnie na
    `WinHttp.WinHttpRequest.5.1`, który przyjmuje tablicę `Byte()` bezpośrednio przez
-   `.Send()`; każde inne wywołanie (`ApiGet`, logowanie itd.) nadal używa
-   `MSXML2.XMLHTTP.6.0`.
+   `.Send()`; każde inne wywołanie (`ApiGet`, logowanie itd.) używało `MSXML2.XMLHTTP.6.0`
+   do listopada 2026 (zob. niżej).
 
 Kolejne rundy testów na żywo (do 2026-08-27) znalazły i naprawiły jeszcze kilka spraw,
 podsumowanych tu zbiorczo zamiast punkt po punkcie — pełne szczegóły w historii gita:
@@ -334,6 +348,15 @@ nowo utworzonych elementów-liści z korzenia drzewa po podpięciu do właściwe
 oraz powtarzające się załączniki roli "cad" gromadzące się przy każdym zapisie na tej
 samej rewizji, naprawione przez sprawdzenie i skasowanie istniejącego załącznika o tej
 samej nazwie pliku przed fallbackowym uploadem HTTP.
+
+Znalezione 17.11.2026 na SOLIDWORKS 2024 SP5: po zalogowaniu przez przeglądarkę każde żądanie
+było odrzucane (`/auth/device/token -> 200`, a zaraz potem `/auth/me -> 401`), choć logowanie
+hasłem działało. `MSXML2.XMLHTTP.6.0` działa na WinINet, którego magazyn ciasteczek jest wspólny
+z Internet Explorerem: logowanie hasłem (`/auth/macro-login`) odpowiada ciasteczkiem
+`pdm_session`, WinINet je zapamiętał i wysyłał obok tokenu ustawianego ręcznie przez makro, a po
+wylogowaniu to ciasteczko trzymało unieważniony token, który serwer odczytywał. Oba makra używają
+teraz `MSXML2.ServerXMLHTTP.6.0` (ten sam interfejs na WinHTTP, bez wspólnego magazynu ciasteczek
+i bez pamięci podręcznej), z limitami czasu wydłużonymi do 10 minut dla dużych plików.
 
 ## Znane ryzyka / miejsca do sprawdzenia w pierwszej kolejności
 
@@ -360,10 +383,8 @@ zawiodło przy eksporcie albo zapisie.
 - `EasyPDMDownload.bas`: nie próbuje pobierać KONKRETNEJ starszej rewizji — zawsze celuje
   w aktualną. Wszystkie pliki (główny + składniki) lądują płasko w jednym folderze, bez
   odtwarzania struktury BOM jako podfolderów.
-- Brak odpowiednika FreeCAD-owego "folderu docelowego na lokalne kopie" —
-  `RenameAndUpload` kopiuje/wysyła plik prosto do magazynu PDM, nie zostawia zmienionej
-  nazwy kopii obok plików roboczych użytkownika.
-- Hasło przy logowaniu nie jest maskowane (zwykły `InputBox`, bez własnego `UserForm`).
+- Hasło, o które pytają serwery starsze niż 0.9, nie jest maskowane (zwykły `InputBox`, bez
+  własnego `UserForm`).
 - Folder docelowy pobierania to zwykły `InputBox` z tekstem ścieżki, nie przeglądarka
   systemowa plików.
 - Kopiowanie/rejestrowanie/pobieranie pliku przez `storage/` zakłada, że ten folder jest

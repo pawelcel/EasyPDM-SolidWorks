@@ -25,7 +25,8 @@ active document.
 ![The document panel for an assembly](../docs/images/panel-assembly-closeup.png)
 
 The add-in uses the login and server address the macros keep in the registry, so signing in
-once covers both. The outdated-component check needs an EasyPDM 0.9 server, and recognises a
+once covers both; Upload and Download start the browser sign-in themselves when there is no
+valid login. The outdated-component check needs an EasyPDM 0.9 server, and recognises a
 file after SOLIDWORKS saves it again unchanged by the version stamp the Upload macro writes into
 it (`EasyPDM_ContentVersion`); files uploaded by older macros are recognised by their content.
 
@@ -53,7 +54,8 @@ Linux too (`dotnet build -c Release`), which is how the release workflow builds 
 
 Texts are in English, Polish and German, in SOLIDWORKS' language (English when "Use English language menus"
 is ticked), as in the macros.
-Icons are drawn at start-up into `%LOCALAPPDATA%\EasyPDM\SolidWorks`.
+Icons are drawn at start-up into `%LOCALAPPDATA%\EasyPDM\SolidWorks`. What the add-in asks
+the server and decides is logged to `%TEMP%\EasyPDM_addin.log`, beside the macros' own logs.
 
 ## Status
 

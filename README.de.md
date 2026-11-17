@@ -27,8 +27,8 @@ Windows-Registrierung für die Anmeldesitzung):
 
 - **`EasyPDMUpload.bas`** — sendet das aktive SolidWorks-Dokument an EasyPDM. Die Wahl
   von Projekt/neu-oder-vorhanden/Duplizieren/Elementeigenschaften erfolgt im Browser
-  (dasselbe Muster wie bei den FreeCAD-Makros), mit einer Ausnahme — siehe „Unterschiede
-  zu den FreeCAD-Makros" unten.
+  (dasselbe Muster wie bei dem FreeCAD-Add-on), mit einer Ausnahme — siehe „Unterschiede
+  zu dem FreeCAD-Add-on" unten.
 - **`EasyPDMDownload.bas`** — ruft ein Teil/eine Baugruppe aus EasyPDM ab (zusammen mit
   allen Komponenten der Baugruppe) und öffnet es/sie in SolidWorks; die Wahl, WELCHES
   Element, erfolgt ebenfalls im Browser.
@@ -51,7 +51,10 @@ Ein paar schmale, selten durchlaufene Codepfade bleiben in der Praxis tatsächli
 ungetestet (im Quelltext direkt mit `UNVERIFIED` markiert) — siehe „Bekannte Risiken"
 unten.
 
-## Unterschiede zu den FreeCAD-Makros
+Am 17.11.2026 erneut auf SOLIDWORKS 2024 SP5 gelaufen, über das Add-in: Upload, Download, die
+Anmeldung über den Browser, der Versionsstempel und die Sprache passend zu SOLIDWORKS.
+
+## Unterschiede zu dem FreeCAD-Add-on
 
 Das sind **Gegenstücke**, kein 1:1-Port — VBA hat kein eingebautes JSON und keine
 Dialogfenster ohne separate Binärdateien (SolidWorks/VBA UserForm), daher wird einiges
@@ -70,7 +73,7 @@ anders gelöst:
   Abbrechen-Schaltfläche — Escape ist die einzige verfügbare Abbruchgeste.
 - **Wahl von Projekt/neu-oder-vorhanden/Duplizieren/Elementeigenschaften im Browser** —
   dasselbe Muster aus Ticket+`GET /api/auth/browser-login`+Popup „ausstehende Anfrage von
-  einem CAD-Makro" wie bei den FreeCAD-Makros, **mit einer bewussten Ausnahme**: Wenn das
+  einem CAD-Makro" wie bei dem FreeCAD-Add-on, **mit einer bewussten Ausnahme**: Wenn das
   Dokument BEREITS mit einem PDM-Element verknüpft ist (siehe Punkt unten), öffnet das
   Makro den Browser überhaupt NICHT — es fragt lokal (natives `MsgBox`) nach der
   Zustimmung zu einer neuen Revision, plus ob STEP und/oder PDF exportiert werden sollen
@@ -108,14 +111,17 @@ anders gelöst:
 
 ## Was `EasyPDMUpload.bas` tut
 
-1. **Anmeldung** — beim ersten Start (oder wenn die gespeicherte Sitzung
-   abgelaufen/ungültig geworden ist) wird nach der API-Adresse, dem Benutzernamen und
-   dem Passwort gefragt. Das Sitzungstoken wird über die eingebauten
-   `SaveSetting`/`GetSetting` in der Windows-Registrierung gespeichert
-   (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`) — bei weiteren
-   Starts (auch nach einem SolidWorks-Neustart, auch von `EasyPDMDownload.bas` aus — die
-   Sitzung wird gemeinsam genutzt) wird nicht erneut nach der Anmeldung gefragt, solange
-   die Sitzung gültig ist (30 Tage).
+1. **Anmeldung** — beim ersten Start (oder wenn die gespeicherte Anmeldung abgelaufen oder
+   widerrufen ist) meldet es sich über den Browser an: es fragt nach der Serveradresse, öffnet
+   EasyPDM mit einem Code und hat nach Erlauben dort und OK in SolidWorks ein eigenes
+   Makro-Token; das Passwort geht nie durch SolidWorks. Nur ein EasyPDM-Server vor 0.9, der
+   keine Browser-Anmeldung hat, lässt es stattdessen nach Benutzername und Passwort fragen.
+   Das Token wird über die eingebauten `SaveSetting`/`GetSetting` in der
+   Windows-Registrierung gespeichert
+   (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`) — bei weiteren Starts
+   (auch nach einem SolidWorks-Neustart, auch von `EasyPDMDownload.bas` und dem Add-in aus —
+   die Anmeldung wird gemeinsam genutzt) wird nicht erneut gefragt, solange das Token gültig
+   ist (ein Jahr, sofern es nicht unter Einstellungen → Benutzer widerrufen wird).
 2. **Speichert das aktive Dokument**, falls es noch nicht gespeichert wurde (das
    Standard-„Speichern unter"-Fenster von SolidWorks).
 3. **Wenn das aktive Dokument eine Baugruppe ist**: Zuerst werden alle Lightweight-
@@ -134,7 +140,7 @@ anders gelöst:
    Blättern durchlaufen (dieses Dokument zuletzt); für jede NOCH NICHT verknüpfte
    Komponente wird ein eigenes Browser-Ticket geöffnet (dieselbe Wahl Neu/Duplizieren/
    An vorhandenes anhängen wie beim Hauptdokument, angezeigt im bereits geöffneten Tab —
-   siehe „Unterschiede zu den FreeCAD-Makros"). Neu erstellte Komponenten
+   siehe „Unterschiede zu dem FreeCAD-Add-on"). Neu erstellte Komponenten
    erhalten ihren eigenen STEP/PDF-Export (je nach eigener Checkbox-Wahl dieser
    Komponente im Browser) und einen `EasyPDM_ItemId`-Eintrag und werden automatisch
    unter ihrem Elternelement in der Stücklistenstruktur eingehängt. **Bereits verknüpfte
@@ -157,7 +163,7 @@ anders gelöst:
 4. Prüft die **Custom Properties** des Hauptdokuments:
    - **Bereits verknüpft** (hat eine gespeicherte `EasyPDM_ItemId`) — fragt lokal nach der
      Zustimmung, die aktuelle Version als neue Revision anzuhängen, ohne den Browser zu
-     öffnen (siehe „Unterschiede zu den FreeCAD-Makros"), gefolgt von zwei weiteren
+     öffnen (siehe „Unterschiede zu dem FreeCAD-Add-on"), gefolgt von zwei weiteren
      nativen Ja/Nein-Abfragen für STEP-Export (Standard Ja) und PDF-Export (Standard
      Nein).
    - **Noch nicht verknüpft** — öffnet den System-Browser (bereits angemeldet,
@@ -184,10 +190,15 @@ anders gelöst:
      Fehler: jemand prüft das Element und es wird ihm durch einen erneuten Upload still
      unter den Füßen zurückgesetzt). Wer prüft, muss den Status zuerst selbst in der
      Web-Anwendung aus „In Prüfung" herausbewegen.
-5. **Kopiert** die aktuelle Dokumentdatei in das PDM unter dem Namen
-   `nummer (name).REVISION.erweiterung` (dieselbe Konvention wie in der Web-Anwendung und
-   den FreeCAD-Makros). **Die lokale Datei wird NICHT angetastet** — sie wird weder
-   verschoben noch gelöscht. Wenn der PDM-Speicher von dieser Maschine aus sichtbar ist
+5. **Speichert das Dokument unter dem PDM-Namen** `nummer (name).REVISION.erweiterung`
+   (dieselbe Konvention wie in der Web-Anwendung und dem FreeCAD-Add-on) in dem Zielordner,
+   nach dem Upload gefragt hat, und **kopiert** diese Datei ins PDM. Die Datei, unter der das
+   Dokument vorher gespeichert war, bleibt auf der Festplatte — weder verschoben noch gelöscht.
+   Vor diesem Speichern erhält ein Teil oder eine Baugruppe einen neuen **Versionsstempel**,
+   die benutzerdefinierte Eigenschaft `EasyPDM_ContentVersion`, der mit der Datei gesendet
+   wird: damit unterscheidet EasyPDM genau diesen Upload von einer älteren oder lokal
+   geänderten Kopie, auch nachdem SolidWorks die Datei unverändert erneut gespeichert hat —
+   darauf beruht die Prüfung veralteter Komponenten im Add-in. Wenn der PDM-Speicher von dieser Maschine aus sichtbar ist
    (`GET /api/config`), landet die Kopie im gemeinsamen `storage/components/` und wird
    **registriert**, ohne erneut per HTTP hochgeladen zu werden; wenn nicht (typisch, wenn SolidWorks und der EasyPDM-Dienst als
    unterschiedliche Windows-Benutzer laufen — der Speicher liegt unter
@@ -205,8 +216,9 @@ anders gelöst:
    Anhang mit der Rolle `"step"`/`"pdf"` hoch, wobei der vorherige Anhang derselben Rolle
    ersetzt wird — versorgt die dauerhafte 3D-Vorschau (STEP) in der Web-Anwendung. Ein
    Exportfehler (z. B. keine sichtbare Geometrie) bricht den Rest des Vorgangs NICHT ab.
-7. Speichert `EasyPDM_ItemId`/`EasyPDM_ItemNumber` in den Custom Properties des Dokuments
-   und zeigt eine Bestätigung.
+7. Speichert `EasyPDM_ItemId`/`EasyPDM_ItemNumber` in den Custom Properties des Dokuments.
+   Der Bericht des Laufs (was hochging, was fehlschlug) landet in den Benachrichtigungen der
+   Web-Anwendung statt in einem Fenster in SolidWorks.
 
 ## Was `EasyPDMDownload.bas` tut
 
@@ -245,14 +257,13 @@ Anhang.
 
 Drei unabhängige Wege, vom schnellsten zum detailliertesten:
 
-1. **Die Meldung am Ende** — nach einem erfolgreichen Vorgang zeigt das Makro ein Fenster
-   mit einer Zusammenfassung (z. B. „An EasyPDM gesendet: Element #67 (Revision B)."
-   oder ein Download-Protokoll). Ein Fenster mit „Fehler: ..." bedeutet, dass etwas
-   nicht funktioniert hat.
-2. **Die Web-Anwendung** — der sicherste Beweis für einen Upload: ins Projekt gehen
-   (oder „Gesamte Datenbank"), das Element anhand der Nummer aus der Meldung finden und
-   prüfen, ob es eine angehängte Datei hat (Eigenschaftenbereich → Anhänge) und korrekte
-   Eigenschaften.
+1. **Die Web-Anwendung während des Laufs** — die Transferliste rechts hakt jede Datei ab, und
+   am Ende steht in der Glocke (Benachrichtigungen) ein Bericht: wie viele Dateien hoch- oder
+   heruntergingen, welche fehlschlugen, welche übersprungen wurden. Ein Fenster mit „Fehler: ..."
+   in SolidWorks bedeutet, dass etwas nicht funktioniert hat.
+2. **Das Element selbst** — der sicherste Beweis für einen Upload: ins Projekt gehen (oder
+   „Gesamte Datenbank"), das Element finden und prüfen, ob es eine angehängte Datei hat
+   (Eigenschaftenbereich → Anhänge) und korrekte Eigenschaften.
 3. **Das Makro-Protokoll** — jeder Lauf hängt einen detaillierten, zeitgestempelten
    Ablauf an eine gewöhnliche Textdatei an (überschreibt sie nicht; eine separate Datei
    für jedes Makro, damit sie sich nicht vermischen):
@@ -272,7 +283,7 @@ Drei unabhängige Wege, vom schnellsten zum detailliertesten:
 
 ## Installation
 
-SolidWorks hat kein reines Textformat für Makros (wie `.FCMacro` bei FreeCAD) — Makros
+SolidWorks hat kein reines Textformat für Makros (wie Python bei FreeCAD) — Makros
 sind VBA-Projekte. `.bas` ist das Standard-Export-/Importformat für ein VBA-**Modul**
 (nicht für das gesamte Makroprojekt), daher für JEDE der beiden Dateien einzeln:
 
@@ -316,9 +327,9 @@ im FreeCAD-Add-on, ohne kompiliertes Add-in. **Extras → Anpassen → Befehle �
 
 **Anmelden** (`LoginInBrowser`, EasyPDM-Server ab 0.9) fragt nach der Serveradresse, öffnet
 EasyPDM im Browser mit einem Code und speichert nach Erlauben dort und OK in SolidWorks ein
-eigenes Makro-Token — das Passwort geht nie durch SolidWorks. Die bisherige Anmeldung mit
-Benutzer und Passwort beim Start des Upload-Makros funktioniert weiter und ist für ältere Server
-die einzige.
+eigenes Makro-Token — das Passwort geht nie durch SolidWorks. Upload und Download starten diese
+Anmeldung von selbst, wenn keine gültige vorliegt; nur bei Servern vor 0.9 fragen sie
+stattdessen nach Benutzer und Passwort.
 
 ## Historie behobener Probleme
 
@@ -353,8 +364,8 @@ Infrastruktur):
    das schlug bei einem echten Upload selbst noch mit einem allgemeinen Fehler „KEINE
    VERBINDUNG" fehl. Die eigentliche Korrektur: `ApiUploadFile` wurde speziell auf
    `WinHttp.WinHttpRequest.5.1` umgestellt, das ein `Byte()`-Array direkt über `.Send()`
-   akzeptiert; jeder andere Aufruf (`ApiGet`, Anmeldung usw.) nutzt weiterhin
-   `MSXML2.XMLHTTP.6.0`.
+   akzeptiert; jeder andere Aufruf (`ApiGet`, Anmeldung usw.) nutzte `MSXML2.XMLHTTP.6.0` bis
+   November 2026 (siehe unten).
 
 Spätere Runden von Live-Tests (bis 2026-08-27) fanden und behoben noch mehrere weitere
 Probleme, hier zusammengefasst statt einzeln aufgeführt — die volle Historie steht in der
@@ -373,6 +384,16 @@ Blattelemente aus dem Baumstamm, sobald sie an ihrem eigentlichen Elternelement
 eingehängt sind; und sich wiederholende Anhänge der Rolle „cad", die sich bei jedem
 Speichern auf derselben Revision ansammelten, behoben durch Prüfen und Löschen eines
 vorhandenen Anhangs mit demselben Dateinamen vor dem Plain-HTTP-Upload-Fallback.
+
+Gefunden am 17.11.2026 auf SOLIDWORKS 2024 SP5: nach der Anmeldung über den Browser wurde jede
+Anfrage abgewiesen (`/auth/device/token -> 200`, gleich danach `/auth/me -> 401`), während die
+Passwort-Anmeldung funktionierte. `MSXML2.XMLHTTP.6.0` läuft auf WinINet, dessen Cookie-Speicher
+mit dem Internet Explorer geteilt ist: die Passwort-Anmeldung (`/auth/macro-login`) antwortet mit
+einem `pdm_session`-Cookie, WinINet behielt es und sendete es neben dem Token, das das Makro von
+Hand setzt, und nach einer Abmeldung enthielt dieses Cookie ein widerrufenes Token, das der Server
+las. Beide Makros nutzen jetzt `MSXML2.ServerXMLHTTP.6.0` (dieselbe Schnittstelle auf WinHTTP,
+ohne geteilten Cookie-Speicher und ohne Cache), mit auf 10 Minuten verlängerten Zeitlimits für
+große Dateien.
 
 ## Bekannte Risiken / zuerst zu prüfende Stellen
 
@@ -403,11 +424,8 @@ oder Speichern schiefgeht.
   herunterzuladen — zielt immer auf die aktuelle. Alle Dateien (Haupt- +
   Komponentendateien) landen flach in einem Ordner, ohne die Stücklistenstruktur als
   Unterordner nachzubilden.
-- Kein Äquivalent zum FreeCAD-„Zielordner für lokale Kopien" — `RenameAndUpload`
-  kopiert/sendet die Datei direkt in den PDM-Speicher, hinterlässt keine umbenannte
-  Kopie neben den Arbeitsdateien des Benutzers.
-- Das Anmeldepasswort wird nicht maskiert (einfache `InputBox`, ohne eigenes
-  `UserForm`).
+- Das Passwort, nach dem Server vor 0.9 fragen, wird nicht maskiert (einfache `InputBox`,
+  ohne eigenes `UserForm`).
 - Der Zielordner für den Download ist eine einfache `InputBox` mit einem Pfad als Text,
   kein System-Dateibrowser.
 - Das Kopieren/Registrieren/Herunterladen einer Datei über `storage/` setzt voraus, dass

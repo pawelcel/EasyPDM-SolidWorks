@@ -26,7 +26,7 @@ session):
 
 - **`EasyPDMUpload.bas`** — sends the active SolidWorks document to EasyPDM. The choice
   of project/new-vs-existing/duplicate/item properties happens in the browser (the same
-  pattern as the FreeCAD macros), with one exception — see "Differences from the FreeCAD
+  pattern as the FreeCAD add-on), with one exception — see "Differences from the FreeCAD
   macros" below.
 - **`EasyPDMDownload.bas`** — fetches a Part/Assembly from EasyPDM (together with all of
   the assembly's components) and opens it in SolidWorks; the choice of WHICH item also
@@ -47,7 +47,10 @@ reproducing an issue live and pasting the macro's own log, not from a build step
 A few narrow, low-traffic code paths remain genuinely untested in practice (marked
 `UNVERIFIED` inline in the source) — see "Known risks" below.
 
-## Differences from the FreeCAD macros
+Run again on SOLIDWORKS 2024 SP5 on 2026-11-17, through the add-in: Upload, Download, the browser
+sign-in, the version stamp and the language following SOLIDWORKS.
+
+## Differences from the FreeCAD add-on
 
 These are **counterparts**, not a 1:1 port — VBA has no built-in JSON and no dialog
 windows without separate binary files (SolidWorks/VBA UserForm), so several things are
@@ -64,7 +67,7 @@ solved differently:
   Escape is the only available cancel gesture.
 - **Choice of project/new-vs-existing/duplicate/item properties in the browser** — the
   same ticket+`GET /api/auth/browser-login`+"pending request from a CAD macro" popup
-  pattern as the FreeCAD macros, **with one deliberate exception**: if the document is
+  pattern as the FreeCAD add-on, **with one deliberate exception**: if the document is
   ALREADY linked to a PDM item (see the point below), the macro does NOT open the browser
   at all — it asks locally (native `MsgBox`) for consent to a new revision, plus whether
   to export STEP and/or PDF (see below), exactly as before this change. SolidWorks then
@@ -97,12 +100,15 @@ solved differently:
 
 ## What `EasyPDMUpload.bas` does
 
-1. **Login** — on first run (or when the saved session has expired/been invalidated) it
-   asks for the API address, username, and password. The session token is saved in the
-   Windows registry (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`) via
-   the built-in `SaveSetting`/`GetSetting` — subsequent runs (also after restarting
-   SolidWorks, also from `EasyPDMDownload.bas` — the session is shared) don't ask to log
-   in again as long as the session is valid (30 days).
+1. **Login** — on first run (or when the saved login has expired or been revoked) it signs
+   in through the browser: it asks for the server address, opens EasyPDM with a code, and
+   after you click Allow there and OK in SolidWorks it has a macro token of its own; the
+   password never passes through SolidWorks. Only an EasyPDM server older than 0.9, which has
+   no browser sign-in, makes it ask for a username and password instead. The token is saved
+   in the Windows registry (`HKEY_CURRENT_USER\Software\VB and VBA Program Settings\EasyPDM`)
+   via the built-in `SaveSetting`/`GetSetting` — subsequent runs (also after restarting
+   SolidWorks, also from `EasyPDMDownload.bas` and the add-in — the login is shared) don't ask
+   to log in again while the token is valid (a year, unless revoked in Settings → Users).
 2. **Saves the active document**, if it hasn't been saved yet (SolidWorks' standard "Save
    As" window).
 3. **If the active document is an Assembly**: resolves any Lightweight components first
@@ -118,7 +124,7 @@ solved differently:
    summary. If confirmed, it walks leaves first (this document last); for each
    NOT-yet-linked component it opens its own browser ticket (same New item/Duplicate/
    Attach to existing choice as the top-level document, shown in the already-open browser
-   tab — see "Differences from the FreeCAD macros"). Newly created
+   tab — see "Differences from the FreeCAD add-on"). Newly created
    components get their own STEP/PDF export (per that component's own checkbox choice in
    the browser) and `EasyPDM_ItemId` entry, and are automatically attached under their
    parent in the BOM structure. **Already-linked components** are attached to the BOM with
@@ -140,7 +146,7 @@ solved differently:
 4. Checks the main document's **Custom Properties**:
    - **Already linked** (has a saved `EasyPDM_ItemId`) — asks locally for consent to
      attach the current version as a new revision, without opening the browser (see
-     "Differences from the FreeCAD macros"), followed by two more native Yes/No prompts
+     "Differences from the FreeCAD add-on"), followed by two more native Yes/No prompts
      for STEP export (default Yes) and PDF export (default No).
    - **Not yet linked** — opens the system browser (already logged in, token→cookie
      bridge) to the "pending request from a CAD macro" popup, with three options to
@@ -162,10 +168,14 @@ solved differently:
      "In progress" and upload anyway (that was a real, fixed bug: someone reviewing the
      item could have it silently reset out from under them by a re-upload). Whoever is
      reviewing needs to move the item out of "Under review" in the web application first.
-5. **Copies** the current document file into the PDM under the name
-   `number (name).REVISION.extension` (the same convention as in the web application and
-   the FreeCAD macros). **The local file is NOT touched** — it is neither moved nor
-   deleted. If the PDM storage is visible from this machine (`GET /api/config`), the copy
+5. **Saves the document under the PDM name** `number (name).REVISION.extension` (the same
+   convention as in the web application and the FreeCAD add-on) in the target folder Upload
+   asked for, and **copies** that file into the PDM. The file it was saved under before stays
+   on disk, neither moved nor deleted. Before that save, a part or assembly gets a fresh
+   **version stamp**, the custom property `EasyPDM_ContentVersion`, sent along with the file:
+   it lets EasyPDM tell this exact upload from an older or a locally changed copy, also after
+   SolidWorks saves the file again unchanged, which is what the add-in's outdated-component
+   check relies on. If the PDM storage is visible from this machine (`GET /api/config`), the copy
    goes to the shared `storage/components/` and is **registered** without re-uploading
    over HTTP; if not (typical when SolidWorks and the
    EasyPDM service run as different Windows users — the storage is under
@@ -182,8 +192,9 @@ solved differently:
    the role `"step"`/`"pdf"`, replacing the previous attachment of that same role — feeds
    the persistent 3D preview (STEP) in the web application. An export error (e.g. no
    visible geometry) does NOT abort the rest of the operation.
-7. Saves `EasyPDM_ItemId`/`EasyPDM_ItemNumber` into the document's Custom Properties and
-   shows a confirmation.
+7. Saves `EasyPDM_ItemId`/`EasyPDM_ItemNumber` into the document's Custom Properties. The
+   report of the run (what went up, what failed) lands in the web app's notifications rather
+   than in a window in SolidWorks.
 
 ## What `EasyPDMDownload.bas` does
 
@@ -218,12 +229,13 @@ manually in the web application), it simply takes the most recently uploaded att
 
 Three independent ways, from the fastest to the most detailed:
 
-1. **The message at the end** — after a successful operation the macro shows a window
-   with a summary (e.g. "Sent to EasyPDM: item #67 (revision B)." or a download log). A
-   window with "Error: ..." means something went wrong.
-2. **The web application** — the most reliable proof for an upload: go into the project
-   (or "Whole database"), find the item by the number from the message and check whether
-   it has an attached file (properties panel → Attachments) and correct properties.
+1. **The web application while it runs** — the transfer list on the right ticks each file
+   off, and at the end the bell (notifications) holds a report: how many files went up or
+   came down, which failed, which were skipped. A window with "Error: ..." in SolidWorks
+   means something went wrong.
+2. **The item itself** — the most reliable proof for an upload: go into the project (or
+   "Whole database"), find the item and check whether it has an attached file (properties
+   panel → Attachments) and correct properties.
 3. **The macro log** — every run appends (does not overwrite) a detailed, timestamped
    record to a plain text file (a separate file for each macro, so they don't get mixed
    up):
@@ -242,7 +254,7 @@ Three independent ways, from the fastest to the most detailed:
 
 ## Installation
 
-SolidWorks has no plain-text macro format (like `.FCMacro` in FreeCAD) — macros are VBA
+SolidWorks has no plain-text macro format (like FreeCAD's Python) — macros are VBA
 projects. `.bas` is the standard export/import format for a VBA **module** (not the
 whole macro project), so for EACH of the two files separately:
 
@@ -284,9 +296,9 @@ the "New Macro Button" onto a toolbar four times and point each at:
 
 **Log in** (`LoginInBrowser`, EasyPDM servers from 0.9) asks for the server address, opens
 EasyPDM in the browser with a code, and after you click Allow there and OK in SolidWorks
-stores the macro's own token — the password never passes through SolidWorks. The Upload
-macro's own login with login and password still works, and for older servers it is the only
-one.
+stores the macro's own token — the password never passes through SolidWorks. Upload and
+Download start the same sign-in by themselves when there is no valid login; only for servers
+older than 0.9 do they ask for a login and password instead.
 
 ## History of fixed issues
 
@@ -316,7 +328,7 @@ this codebase has hit before (both macros now share this fixed infrastructure):
    itself still failed on a real upload with a generic "NO CONNECTION" error. The actual
    fix: `ApiUploadFile` switched specifically to `WinHttp.WinHttpRequest.5.1`, which
    accepts a `Byte()` array directly via `.Send()`; every other call (`ApiGet`, login,
-   etc.) still uses `MSXML2.XMLHTTP.6.0`.
+   etc.) kept using `MSXML2.XMLHTTP.6.0` until 2026-11 (see below).
 
 Later rounds of live testing (through 2026-08-27) found and fixed several more issues,
 summarized here rather than item-by-item — see git history for the full detail:
@@ -333,6 +345,15 @@ newly-created leaf items from the tree root once attached to their real parent; 
 repeated "cad"-role attachments accumulating on every save at the same revision, fixed
 by checking for and deleting an existing same-filename attachment before the plain-HTTP
 upload fallback.
+
+Found on 2026-11-17 on SOLIDWORKS 2024 SP5: after signing in through the browser, every request
+was refused (`/auth/device/token -> 200`, then `/auth/me -> 401`), while a password login kept
+working. `MSXML2.XMLHTTP.6.0` runs on WinINet, whose cookie jar is shared with Internet Explorer:
+the password login (`/auth/macro-login`) answers with a `pdm_session` cookie, WinINet kept it and
+sent it beside the token the macro sets by hand, and after a logout that cookie held a revoked
+token, which the server read. Both macros now use `MSXML2.ServerXMLHTTP.6.0` (the same interface
+on WinHTTP, which has no shared cookie jar and no cache), with timeouts raised to 10 minutes for
+large files.
 
 ## Known risks / places to check first
 
@@ -359,10 +380,8 @@ save behavior.
 - `EasyPDMDownload.bas`: does not try to download a SPECIFIC older revision — always
   targets the current one. All files (main + components) land flat in one folder,
   without recreating the BOM structure as subfolders.
-- No equivalent of FreeCAD's "target folder for local copies" — `RenameAndUpload`
-  copies/sends the file straight to the PDM storage, doesn't leave a renamed copy
-  alongside the user's working files.
-- The login password is not masked (plain `InputBox`, with no dedicated `UserForm`).
+- The login password asked for by servers older than 0.9 is not masked (plain `InputBox`,
+  with no dedicated `UserForm`).
 - The download's target folder is a plain `InputBox` with a path as text, not a system
   file browser.
 - Copying/registering/downloading a file through `storage/` assumes this folder is
