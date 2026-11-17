@@ -9,6 +9,14 @@ SolidWorksa: dodatek z zakładką EasyPDM we wstążce ([`Addin/`](Addin/README.
 Download, które uruchamia, oraz arkusz rysunkowy EasyPDM. Do wersji 0.9 były w repozytorium
 EasyPDM, w `EasyPDM.SolidWorks/`; przeniesiono je razem z historią.
 
+![Zakładka EasyPDM w SOLIDWORKS](docs/images/ribbon.png)
+
+![Część z panelem dokumentu EasyPDM w Task Pane](docs/images/panel-part.png)
+
+**Instalacja dodatku:** pobierz najnowsze [wydanie](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
+(zip i oba makra `.swp`), rozpakuj je do jednego stałego folderu, uruchom `install.cmd` jako
+administrator i włącz SOLIDWORKS — szczegóły w [`Addin/README.md`](Addin/README.md) (po angielsku).
+
 ## Makra
 
 Dwa makra `.bas`, każde w pełni samodzielne (osobny plik, osobny moduł VBA, bez zależności
@@ -254,11 +262,12 @@ projektu makra), więc dla KAŻDEGO z dwóch plików osobno:
 Adres API (domyślnie `http://localhost:5000/api`) zapisuje się automatycznie po pierwszym
 podaniu przy logowaniu — wspólnie dla obu makr.
 
-### Dodatek EasyPDM (w repozytorium, jeszcze niewydany)
+### Dodatek EasyPDM
 
-[`Addin/`](Addin/) to dodatek do SOLIDWORKS z menu i paskiem EasyPDM (Upload, Download,
-Zaloguj, Wyloguj), który uruchamia te makra; instalację opisuje jego README. Bez niego ten sam
-pasek można złożyć z makr ręcznie:
+[`Addin/`](Addin/README.md) to dodatek do SOLIDWORKS z zakładką EasyPDM (Upload, Download,
+Blokada, Logowanie, Panel), który uruchamia te makra, z własnym panelem dokumentu i
+sprawdzaniem nieaktualnych komponentów; jest w każdym [wydaniu](https://github.com/pawelcel/EasyPDM-SolidWorks/releases).
+Bez niego cztery polecenia makr można ułożyć na pasku ręcznie:
 
 ### Pasek narzędzi EasyPDM
 

@@ -3,6 +3,8 @@
 An **EasyPDM** tab in the CommandManager (parts, assemblies, drawings), a **Tools → EasyPDM**
 menu and the **EasyPDM document panel** in the Task Pane.
 
+![The EasyPDM tab](../docs/images/ribbon.png)
+
 | Command | What it does |
 |---|---|
 | **Upload** | Runs the Upload macro (`EasyPDMUpload.swp`, `main`). Refused first when the document, or a component of the assembly, is older than its file in EasyPDM: download the newest, then upload. |
@@ -17,6 +19,8 @@ editing / Release lock, Upload and Log in / Log out, and for an assembly the tre
 components, each marked as the newest file in EasyPDM, changed here, not in EasyPDM yet, or
 with a newer file in EasyPDM (with who uploaded it and when, in its tooltip). It follows the
 active document.
+
+![The document panel for an assembly](../docs/images/panel-assembly-closeup.png)
 
 The add-in uses the login and server address the macros keep in the registry, so signing in
 once covers both. The outdated-component check needs an EasyPDM 0.9 server, and recognises a

@@ -9,6 +9,14 @@ an add-in with an EasyPDM tab in the CommandManager ([`Addin/`](Addin/README.md)
 Download macros it runs, and the EasyPDM drawing sheet. Until 0.9 they lived in the EasyPDM
 repository, in `EasyPDM.SolidWorks/`; their history came along.
 
+![The EasyPDM tab in SOLIDWORKS](docs/images/ribbon.png)
+
+![A part with the EasyPDM document panel in the Task Pane](docs/images/panel-part.png)
+
+**Installing the add-in:** download the latest [release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
+(the zip and both `.swp` macros), unpack them into one folder that stays, run `install.cmd` as
+administrator and start SOLIDWORKS — details in [`Addin/README.md`](Addin/README.md).
+
 ## The macros
 
 Two `.bas` macros, each fully self-contained (separate file, separate VBA module, no
@@ -253,12 +261,12 @@ whole macro project), so for EACH of the two files separately:
 The API address (default `http://localhost:5000/api`) is saved automatically after being
 entered once at login — shared by both macros.
 
-### The EasyPDM add-in (in the repository, not released yet)
+### The EasyPDM add-in
 
-[`Addin/`](Addin/) is a SOLIDWORKS add-in with an EasyPDM menu and toolbar (Upload, Download,
-Log in, Log out) that runs these macros; see its README for building and installing. It is not
-attached to releases until it has run on a live SolidWorks. Without it, the same
-toolbar can be made from the macros by hand:
+[`Addin/`](Addin/README.md) is a SOLIDWORKS add-in with an EasyPDM tab (Upload, Download, Lock,
+Log in/out, Panel) that runs these macros, and a document panel with the outdated-component
+check of its own; it comes with every [release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases).
+Without it, the four macro commands can be put on a toolbar by hand:
 
 ### An EasyPDM toolbar
 

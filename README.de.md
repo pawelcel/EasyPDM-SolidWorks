@@ -10,6 +10,14 @@ selbst gehosteten PDM: ein Add-in mit einer EasyPDM-Registerkarte im CommandMana
 EasyPDM-Zeichnungsblatt. Bis 0.9 lagen sie im EasyPDM-Repository unter `EasyPDM.SolidWorks/`;
 ihre Geschichte ist mitgekommen.
 
+![Die EasyPDM-Registerkarte in SOLIDWORKS](docs/images/ribbon.png)
+
+![Ein Teil mit dem EasyPDM-Dokumentbereich im Task Pane](docs/images/panel-part.png)
+
+**Add-in installieren:** das neueste [Release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
+herunterladen (Zip und beide `.swp`-Makros), in einen bleibenden Ordner entpacken, `install.cmd`
+als Administrator ausführen und SOLIDWORKS starten — Details in [`Addin/README.md`](Addin/README.md) (auf Englisch).
+
 ## Die Makros
 
 Zwei `.bas`-Makros, jedes vollständig eigenständig (separate Datei, separates VBA-Modul,
@@ -285,11 +293,12 @@ sind VBA-Projekte. `.bas` ist das Standard-Export-/Importformat für ein VBA-**M
 Die API-Adresse (standardmäßig `http://localhost:5000/api`) wird nach der ersten Eingabe
 bei der Anmeldung automatisch gespeichert — gemeinsam für beide Makros.
 
-### Das EasyPDM-Add-in (im Repository, noch nicht veröffentlicht)
+### Das EasyPDM-Add-in
 
-[`Addin/`](Addin/) ist ein SOLIDWORKS-Add-in mit EasyPDM-Menü und -Symbolleiste (Upload,
-Download, Anmelden, Abmelden), das diese Makros ausführt; die Installation beschreibt seine
-README. Ohne das Add-in lässt sich dieselbe Symbolleiste von Hand aus den Makros bauen:
+[`Addin/`](Addin/README.md) ist ein SOLIDWORKS-Add-in mit einer EasyPDM-Registerkarte (Upload,
+Download, Sperre, Anmeldung, Bereich), das diese Makros ausführt, mit eigenem Dokumentbereich
+und eigener Prüfung veralteter Komponenten; es liegt jedem [Release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases) bei.
+Ohne das Add-in lassen sich die vier Makrobefehle von Hand auf eine Symbolleiste legen:
 
 ### Eine EasyPDM-Symbolleiste
 
