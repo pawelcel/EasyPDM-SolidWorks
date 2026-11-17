@@ -16,6 +16,7 @@ EasyPDM, w `EasyPDM.SolidWorks/`; przeniesiono je razem z historią.
 **Instalacja dodatku:** pobierz najnowsze [wydanie](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
 (zip i oba makra `.swp`), rozpakuj je do jednego stałego folderu, uruchom `install.cmd` jako
 administrator i włącz SOLIDWORKS — szczegóły w [`Addin/README.md`](Addin/README.md) (po angielsku).
+**Krok po kroku, ze zrzutami ekranu: [wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)** (po angielsku).
 
 ## Makra
 

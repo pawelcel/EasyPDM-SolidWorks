@@ -17,6 +17,7 @@ ihre Geschichte ist mitgekommen.
 **Add-in installieren:** das neueste [Release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
 herunterladen (Zip und beide `.swp`-Makros), in einen bleibenden Ordner entpacken, `install.cmd`
 als Administrator ausführen und SOLIDWORKS starten — Details in [`Addin/README.md`](Addin/README.md) (auf Englisch).
+**Schritt für Schritt, mit Screenshots: [das Wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)** (auf Englisch).
 
 ## Die Makros
 

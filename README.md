@@ -16,6 +16,7 @@ repository, in `EasyPDM.SolidWorks/`; their history came along.
 **Installing the add-in:** download the latest [release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
 (the zip and both `.swp` macros), unpack them into one folder that stays, run `install.cmd` as
 administrator and start SOLIDWORKS — details in [`Addin/README.md`](Addin/README.md).
+**Step by step, with screenshots of where everything is: [the wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki).**
 
 ## The macros
 
