@@ -219,15 +219,61 @@ namespace EasyPDM.SolidWorksAddin
 
         public void OnUpload()
         {
-            if (!RefuseOutdated())
+            if (EnsureSignedIn() && !RefuseOutdated())
                 RunMacro("EasyPDMUpload.swp", "EasyPDMUpload", "main");
             RefreshPanel();
         }
 
         public void OnDownload()
         {
-            RunMacro("EasyPDMDownload.swp", "EasyPDMDownload", "main");
+            if (EnsureSignedIn())
+                RunMacro("EasyPDMDownload.swp", "EasyPDMDownload", "main");
             RefreshPanel();
+        }
+
+        /// Signed in before Upload or Download starts, through the browser as the Log in button
+        /// does. The macros would otherwise ask for a login and password themselves whenever the
+        /// stored token is missing or refused; their own login stays only for servers before
+        /// 0.9, which have no browser sign-in. False when the person cancelled the sign-in.
+        private bool EnsureSignedIn()
+        {
+            if (TokenWorks() != false) return true;
+            var support = BrowserLoginSupported();
+            if (support == false) return true; // a server before 0.9: the macro asks for a password
+            RunMacro("EasyPDMUpload.swp", "EasyPDMUpload", "LoginInBrowser");
+            return TokenWorks() != false;
+        }
+
+        /// True when the stored token is accepted, false when there is none or the server refuses
+        /// it, null when the server cannot be asked (the macro then reports that itself).
+        private static bool? TokenWorks()
+        {
+            if (!Settings.SignedIn) return false;
+            try
+            {
+                var me = Api.Call("GET", "/auth/me");
+                return me.Status == 401 ? false : (bool?)true;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// Whether the server signs CAD programs in through the browser (EasyPDM 0.9): its token
+        /// endpoint answers an unknown request with 410 Gone, where an older server has no such
+        /// route. Null when the server cannot be reached -- then the browser sign-in, which asks
+        /// for the server's address first, is the way to set it.
+        private static bool? BrowserLoginSupported()
+        {
+            try
+            {
+                return Api.Call("POST", "/auth/device/token", new System.Collections.Generic.Dictionary<string, object> { ["deviceCode"] = "" }).Status == 410;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public void OnAccount()
