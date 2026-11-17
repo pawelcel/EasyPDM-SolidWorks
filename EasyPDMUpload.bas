@@ -100,6 +100,13 @@ Private Const MACRO_CLIENT_NAME As String = "SolidWorks Upload"
 ' Names of the document Custom Properties used to store the PDM link -- see module header.
 Private Const CUSTPROP_ITEM_ID As String = "EasyPDM_ItemId"
 Private Const CUSTPROP_ITEM_NUMBER As String = "EasyPDM_ItemNumber"
+' Version stamp of the CAD file: a new GUID written before each upload and sent with it, so
+' the server can tell a copy of this exact upload from an older or a changed one
+' (POST /api/items/cad-versions, EasyPDM 0.9). Unlike the file's hash it survives SolidWorks
+' saving the file again unchanged -- which it does to components whenever their assembly is
+' saved. The EasyPDM add-in reads it to mark outdated components; FreeCAD keeps the same
+' stamp in the document's Meta.
+Private Const CUSTPROP_CONTENT_VERSION As String = "EasyPDM_ContentVersion"
 ' Nazwa elementu z PDM, zapisywana jako wlasciwosc dokumentu, zeby dalo sie ja wciagnac do
 ' wlasnych szablonow rysunku/tabelki ($PRP:"EasyPDM_Name"). Potrzebna zwlaszcza wtedy, gdy
 ' nazwa elementu NIE wchodzi w nazwe pliku (Ustawienia -> Numeracja): wtedy plik nazywa sie
@@ -154,7 +161,7 @@ Private Const SW_CUSTOM_INFO_TEXT As Long = 30              ' swCustomInfoType_e
 Private Const SW_CUSTOM_PROPERTY_REPLACE As Long = 2        ' swCustomPropertyAddOption_e.swCustomPropertyReplaceValue
 ' Bumped by hand on every change and written into the first log line, so a log shows at once
 ' whether the latest macro was imported or an older copy ran (happened twice in testing).
-Private Const MACRO_REVISION As String = "2026-11-15.2"
+Private Const MACRO_REVISION As String = "2026-11-17.1"
 Private Const SW_SAVE_AS_SILENT As Long = 1                 ' swSaveAsOptions_e.swSaveAsOptions_Silent -- UNVERIFIED against a
                                                              ' live SolidWorks install, confirm on first real test (see
                                                              ' UploadStepAttachment).
@@ -990,10 +997,12 @@ NetErr:
     Err.Raise ERR_API, "EasyPDM", T("NoConnectionPrefix") & GetBaseUrl() & ": " & Err.Description
 End Function
 
-Function ApiRegisterAttachment(ByVal itemId As String, ByVal filePath As String, Optional ByVal role As String = "") As Object
+Function ApiRegisterAttachment(ByVal itemId As String, ByVal filePath As String, Optional ByVal role As String = "", Optional ByVal contentVersion As String = "") As Object
     Dim bodyJson As String
     bodyJson = "{""filePath"":" & JsonStr(filePath)
     If role <> "" Then bodyJson = bodyJson & ",""role"":" & JsonStr(role)
+    ' Servers before 0.9 ignore the unknown field (and keep no version stamps).
+    If contentVersion <> "" Then bodyJson = bodyJson & ",""contentVersion"":" & JsonStr(contentVersion)
     bodyJson = bodyJson & "}"
     Set ApiRegisterAttachment = ApiPostJson("/items/" & itemId & "/attachments/register", bodyJson)
 End Function
@@ -2075,6 +2084,25 @@ Function RenameAndUpload(ByVal swModel As Object, ByVal filePath As String, ByVa
     If role = "cad" Then SetMassPropertyOn swModel
     If role = "cad" Then SetMaterialPropertyOn swModel
 
+    ' A fresh version stamp, saved into the file below and sent with it (see
+    ' CUSTPROP_CONTENT_VERSION). Only for the CAD file itself: the server keeps stamps for
+    ' role "cad" only, and a drawing is never a component of an assembly.
+    Dim contentVersion As String
+    contentVersion = ""
+    If role = "cad" Then
+        On Error Resume Next
+        Err.Clear
+        contentVersion = NewGuid()
+        Dim stampMgr As Object
+        Set stampMgr = GetCustPropMgrOn(swModel)
+        stampMgr.Add3 CUSTPROP_CONTENT_VERSION, SW_CUSTOM_INFO_TEXT, contentVersion, SW_CUSTOM_PROPERTY_REPLACE
+        If Err.Number <> 0 Then
+            LogLine "Warning: could not write the version stamp (" & Err.Description & ") -- the file is known by its hash only."
+            contentVersion = ""
+        End If
+        On Error GoTo 0
+    End If
+
     Dim linkSaveErrors As Long, linkSaveWarnings As Long
     On Error Resume Next
     Err.Clear
@@ -2126,11 +2154,14 @@ Function RenameAndUpload(ByVal swModel As Object, ByVal filePath As String, ByVa
     End If
 
     If targetPath <> "" Then
-        ' If a copy of THE SAME revision (exact same name) is already registered, there is
-        ' nothing to do -- the fresh bytes are already there (FileCopy overwrote in place),
-        ' and registering the same path a second time would fail anyway (unique file_path
-        ' in the database). Attachments of other revisions (different letter) stay
-        ' untouched.
+        ' If a copy of THE SAME revision (exact same name) is already registered, FileCopy
+        ' has just overwritten its bytes in place. It is registered again all the same, so
+        ' the server records the new file (its hash and version stamp) -- servers from 0.7
+        ' replace a same-name "cad" attachment on registration and keep the file, since it
+        ' is the same path. An older server refuses (unique file_path); then the bytes are
+        ' in place as before and only the version record is missing, so that refusal is
+        ' logged and the copy is NOT deleted. Attachments of other revisions (different
+        ' letter) stay untouched.
         Dim alreadyRegistered As Boolean
         alreadyRegistered = False
         On Error Resume Next
@@ -2147,17 +2178,21 @@ Function RenameAndUpload(ByVal swModel As Object, ByVal filePath As String, ByVa
             Next a
         End If
 
-        If alreadyRegistered Then
-            LogLine "Attachment """ & newFilename & """ already registered -- storage copy overwritten with fresh bytes, no re-registration."
-        Else
-            Dim registerErrNum As Long, registerErrDesc As String
-            On Error Resume Next
-            Err.Clear
-            ApiRegisterAttachment itemId, targetPath, role
-            registerErrNum = Err.Number
-            registerErrDesc = Err.Description
-            On Error GoTo 0
+        Dim registerErrNum As Long, registerErrDesc As String
+        On Error Resume Next
+        Err.Clear
+        ApiRegisterAttachment itemId, targetPath, role, contentVersion
+        registerErrNum = Err.Number
+        registerErrDesc = Err.Description
+        On Error GoTo 0
 
+        If alreadyRegistered Then
+            If registerErrNum <> 0 Then
+                LogLine "Attachment """ & newFilename & """ already registered; storage copy overwritten with fresh bytes, re-registration refused (" & registerErrDesc & ") -- an EasyPDM server before 0.7."
+            Else
+                LogLine "Attachment """ & newFilename & """ overwritten and registered again."
+            End If
+        Else
             If registerErrNum <> 0 Then
                 ' Registration failed -- without cleanup the copy in storage/components/
                 ' would be orphaned: never registered as an attachment, taking up space on
@@ -2200,7 +2235,11 @@ Function RenameAndUpload(ByVal swModel As Object, ByVal filePath As String, ByVa
     End If
 
     LogLine "Plain HTTP upload: /items/" & itemId & "/attachments as """ & newFilename & """"
-    ApiUploadFile "/items/" & itemId & "/attachments", filePath, newFilename, "role", role
+    If contentVersion <> "" Then
+        ApiUploadFile "/items/" & itemId & "/attachments", filePath, newFilename, "role", role, "contentVersion", contentVersion
+    Else
+        ApiUploadFile "/items/" & itemId & "/attachments", filePath, newFilename, "role", role
+    End If
     RenameAndUpload = True
 End Function
 
