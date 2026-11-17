@@ -3,6 +3,8 @@
 An **EasyPDM** tab in the CommandManager (parts, assemblies, drawings), a **Tools → EasyPDM**
 menu and the **EasyPDM document panel** in the Task Pane.
 
+**Step by step, with screenshots of where everything is: [the wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki).**
+
 ![The EasyPDM tab](../docs/images/ribbon.png)
 
 | Command | What it does |
