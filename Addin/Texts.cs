@@ -63,6 +63,7 @@ namespace EasyPDM.SolidWorksAddin
             ["{0} is missing next to the add-in ({1}). Put the compiled EasyPDM macros there."] =
                 "Brak {0} obok dodatku ({1}). Umieść tam skompilowane makra EasyPDM.",
             ["The macro {0} ({1}) did not run, error {2}."] = "Makro {0} ({1}) nie uruchomiło się, błąd {2}.",
+            ["The macro {0} has no procedure {1}. It has: {2}"] = "Makro {0} nie ma procedury {1}. Ma: {2}",
             ["Could not create the EasyPDM menu: {0}"] = "Nie udało się utworzyć menu EasyPDM: {0}",
         };
 
@@ -120,6 +121,7 @@ namespace EasyPDM.SolidWorksAddin
             ["{0} is missing next to the add-in ({1}). Put the compiled EasyPDM macros there."] =
                 "{0} fehlt neben dem Add-in ({1}). Legen Sie die kompilierten EasyPDM-Makros dorthin.",
             ["The macro {0} ({1}) did not run, error {2}."] = "Das Makro {0} ({1}) wurde nicht ausgeführt, Fehler {2}.",
+            ["The macro {0} has no procedure {1}. It has: {2}"] = "Das Makro {0} hat keine Prozedur {1}. Es hat: {2}",
             ["Could not create the EasyPDM menu: {0}"] = "Das EasyPDM-Menü konnte nicht erstellt werden: {0}",
         };
 

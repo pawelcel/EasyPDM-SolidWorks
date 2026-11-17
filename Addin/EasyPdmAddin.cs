@@ -345,10 +345,54 @@ namespace EasyPDM.SolidWorksAddin
                     swMessageBoxIcon_e.swMbStop);
                 return;
             }
+            // The module is looked up rather than assumed: importing the .bas names it
+            // EasyPDMUpload / EasyPDMDownload, but a macro built another way (the code pasted
+            // into the module SOLIDWORKS creates, "EasyPDMUpload1") has the same procedures
+            // under another module name, and RunMacro2 then fails with error 22 (invalid index).
+            var methods = MacroMethods(path);
+            var found = FindModule(methods, module, procedure);
+            if (found == null && methods.Length > 0)
+            {
+                Tell("EasyPDM: " + T("The macro {0} has no procedure {1}. It has: {2}", file, procedure, string.Join(", ", methods)),
+                    swMessageBoxIcon_e.swMbStop);
+                return;
+            }
             int error;
-            var ok = _sw.RunMacro2(path, module, procedure, (int)swRunMacroOption_e.swRunMacroUnloadAfterRun, out error);
+            var ok = _sw.RunMacro2(path, found ?? module, procedure, (int)swRunMacroOption_e.swRunMacroUnloadAfterRun, out error);
             if (!ok)
-                Tell("EasyPDM: " + T("The macro {0} ({1}) did not run, error {2}.", file, procedure, error), swMessageBoxIcon_e.swMbStop);
+                Tell("EasyPDM: " + T("The macro {0} ({1}) did not run, error {2}.", file, (found ?? module) + "." + procedure, error)
+                    + (methods.Length > 0 ? "\n" + string.Join(", ", methods) : ""), swMessageBoxIcon_e.swMbStop);
+        }
+
+        /// The macro's procedures without arguments, as "Module.Procedure"; empty when SOLIDWORKS
+        /// cannot list them.
+        private string[] MacroMethods(string path)
+        {
+            try
+            {
+                var list = _sw.GetMacroMethods(path, 1 /* swMethodsWithoutArguments */) as object[];
+                return list == null ? new string[0] : list.Select(o => Convert.ToString(o)).Where(s => !string.IsNullOrEmpty(s)).ToArray();
+            }
+            catch
+            {
+                return new string[0];
+            }
+        }
+
+        /// The module holding `procedure`: the expected one when it has it, otherwise the first
+        /// that does; null when none does.
+        internal static string FindModule(string[] methods, string expected, string procedure)
+        {
+            string first = null;
+            foreach (var m in methods)
+            {
+                var dot = m.LastIndexOf('.');
+                if (dot <= 0 || !string.Equals(m.Substring(dot + 1), procedure, StringComparison.OrdinalIgnoreCase)) continue;
+                var module = m.Substring(0, dot);
+                if (string.Equals(module, expected, StringComparison.OrdinalIgnoreCase)) return module;
+                if (first == null) first = module;
+            }
+            return first;
         }
 
         [ComRegisterFunction]
