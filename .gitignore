@@ -1,0 +1,6 @@
+bin/
+obj/
+*.user
+.vs/
+# Compiled macros are built on a live SOLIDWORKS and attached to releases by hand.
+*.swp

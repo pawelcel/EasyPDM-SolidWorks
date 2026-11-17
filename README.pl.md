@@ -1,6 +1,13 @@
-# EasyPDM — makra SolidWorks
+# EasyPDM dla SolidWorks
 
 [English](README.md) | **Polski** | [Deutsch](README.de.md)
+
+Część [EasyPDM](https://github.com/pawelcel/EasyPDM) (małego PDM-u na własnym serwerze) dla
+SolidWorksa: dodatek z zakładką EasyPDM we wstążce ([`Addin/`](Addin/README.md)), makra Upload i
+Download, które uruchamia, oraz arkusz rysunkowy EasyPDM. Do wersji 0.9 były w repozytorium
+EasyPDM, w `EasyPDM.SolidWorks/`; przeniesiono je razem z historią.
+
+## Makra
 
 Dwa makra `.bas`, każde w pełni samodzielne (osobny plik, osobny moduł VBA, bez zależności
 między sobą poza współdzielonym miejscem w rejestrze Windows na sesję logowania):
@@ -358,9 +365,8 @@ makro Upload, które wypełnia go przy każdej wysyłce rysunku.
 ### `EasyPDMSheetFormat.bas` — tworzenie formatu arkusza (raz)
 
 **Bez makra:** gotowe pliki są w [`templates/`](templates/) —
-`EasyPDM_A3/A2/A1_Landscape.slddrt` (format arkusza) i `.drwdot` (szablon rysunku); najlepiej z
-folderu tagu wersji, na której działa serwer (0.8.2 dołączało je do wydania, kolejne wydania
-linkują folder). Wystarczy umieścić je w dowolnym folderze, dodać
+`EasyPDM_A3/A2/A1_Landscape.slddrt` (format arkusza) i `.drwdot` (szablon rysunku); w tym folderze
+jest aktualny arkusz. Wystarczy umieścić je w dowolnym folderze, dodać
 go w Narzędzia → Opcje → Lokalizacje plików (Formaty arkusza i Szablony dokumentów) i zaczynać
 rysunki od szablonu; krok 3 poniżej jest ten sam. Makro służy do zbudowania ich samemu, np. po
 zmianie `build_templates.py` — wtedy pliki w `templates/` też trzeba zbudować od nowa i

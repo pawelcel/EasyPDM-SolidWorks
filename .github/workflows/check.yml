@@ -1,0 +1,25 @@
+name: Check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+      - name: Add-in builds
+        run: dotnet build Addin -c Release -warnaserror
+      - name: Macros are ASCII with CRLF line endings
+        # VBA imports a .bas as ANSI (non-ASCII becomes mojibake) and refuses LF-only lines.
+        run: |
+          fail=0
+          for f in *.bas; do
+            if LC_ALL=C grep -q '[^[:print:][:space:]]' "$f"; then echo "::error file=$f::non-ASCII character"; fail=1; fi
+            if [ "$(tr -cd '\n' < "$f" | wc -c)" != "$(grep -c $'\r$' "$f")" ]; then echo "::error file=$f::line without CRLF"; fail=1; fi
+          done
+          exit $fail

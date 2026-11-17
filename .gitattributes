@@ -1,0 +1,4 @@
+# SOLIDWORKS' VBA "Import File" rejects LF-only files, and reads them as ANSI: keep the macros
+# CRLF and ASCII, whatever the checkout's settings.
+*.bas text eol=crlf
+*.cmd text eol=crlf

@@ -1,6 +1,13 @@
-# EasyPDM — SolidWorks macros
+# EasyPDM for SolidWorks
 
 **English** | [Polski](README.pl.md) | [Deutsch](README.de.md)
+
+The SolidWorks side of [EasyPDM](https://github.com/pawelcel/EasyPDM), a small, self-hosted PDM:
+an add-in with an EasyPDM tab in the CommandManager ([`Addin/`](Addin/README.md)), the Upload and
+Download macros it runs, and the EasyPDM drawing sheet. Until 0.9 they lived in the EasyPDM
+repository, in `EasyPDM.SolidWorks/`; their history came along.
+
+## The macros
 
 Two `.bas` macros, each fully self-contained (separate file, separate VBA module, no
 dependencies between them beyond a shared spot in the Windows registry for the login
@@ -358,9 +365,8 @@ which fills it in every time a drawing is sent.
 ### `EasyPDMSheetFormat.bas` — creating the sheet format (once)
 
 **Without the macro:** the finished files are in [`templates/`](templates/) —
-`EasyPDM_A3/A2/A1_Landscape.slddrt` (sheet format) and `.drwdot` (drawing template); take them
-from the folder of the tag your server runs (0.8.2 attached them to its release, later releases
-link the folder instead). Put them
+`EasyPDM_A3/A2/A1_Landscape.slddrt` (sheet format) and `.drwdot` (drawing template); the sheet
+in this folder is the current one. Put them
 in any folder, add it under Tools → Options → File Locations (Sheet Formats and Document
 Templates) and start drawings from the template; step 3 below is the same. The macro is for
 building them yourself, e.g. after changing `build_templates.py` — and then the files in

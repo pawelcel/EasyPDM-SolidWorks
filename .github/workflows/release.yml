@@ -1,0 +1,47 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  draft:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "10.0.x"
+      - name: Version matches the add-in
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PROJ=$(grep -oP '(?<=<Version>)[^<]+' Addin/EasyPDM.SolidWorks.Addin.csproj)
+          if [ "$TAG" != "$PROJ" ]; then
+            echo "::error::Tag says $TAG but Addin/EasyPDM.SolidWorks.Addin.csproj has $PROJ. Update <Version>, commit and tag again."
+            exit 1
+          fi
+      - name: Build the zip
+        # The compiled EasyPDMUpload.swp / EasyPDMDownload.swp are not in it: only a live
+        # SOLIDWORKS can write them. They are attached to the draft by hand, and the add-in
+        # needs them in its folder. The .bas sources go in so the folder is complete otherwise.
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          dotnet build Addin -c Release -p:Version="$VERSION"
+          mkdir -p out/EasyPDM-SolidWorks
+          cp Addin/bin/Release/net48/EasyPDM.SolidWorks.Addin.dll Addin/install.cmd Addin/uninstall.cmd \
+             Addin/README.md EasyPDMUpload.bas EasyPDMDownload.bas LICENSE out/EasyPDM-SolidWorks/
+          (cd out && zip -q -r "../EasyPDM_SolidWorks_Addin_v${VERSION}.zip" EasyPDM-SolidWorks)
+      - name: Release notes from CHANGELOG.md
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          awk -v header="## [$VERSION]" '$0 == header { found=1; next } found && /^## \[/ { exit } found { print }' CHANGELOG.md > notes.md
+          cat notes.md
+      - name: Draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" --draft --title "EasyPDM for SolidWorks ${GITHUB_REF_NAME#v}" \
+            --notes-file notes.md "EasyPDM_SolidWorks_Addin_${GITHUB_REF_NAME}.zip"

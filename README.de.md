@@ -1,6 +1,14 @@
-# EasyPDM — SolidWorks-Makros
+# EasyPDM für SolidWorks
 
 [English](README.md) | [Polski](README.pl.md) | **Deutsch**
+
+Der SolidWorks-Teil von [EasyPDM](https://github.com/pawelcel/EasyPDM), einem kleinen,
+selbst gehosteten PDM: ein Add-in mit einer EasyPDM-Registerkarte im CommandManager
+([`Addin/`](Addin/README.md)), die Upload- und Download-Makros, die es ausführt, und das
+EasyPDM-Zeichnungsblatt. Bis 0.9 lagen sie im EasyPDM-Repository unter `EasyPDM.SolidWorks/`;
+ihre Geschichte ist mitgekommen.
+
+## Die Makros
 
 Zwei `.bas`-Makros, jedes vollständig eigenständig (separate Datei, separates VBA-Modul,
 ohne Abhängigkeiten untereinander außer einem gemeinsamen Platz in der
@@ -401,9 +409,8 @@ das es bei jedem Senden einer Zeichnung ausfüllt.
 ### `EasyPDMSheetFormat.bas` — Blattformat erstellen (einmalig)
 
 **Ohne das Makro:** Die fertigen Dateien liegen in [`templates/`](templates/) —
-`EasyPDM_A3/A2/A1_Landscape.slddrt` (Blattformat) und `.drwdot` (Zeichnungsvorlage); am besten
-aus dem Ordner des Tags der Version, die Ihr Server nutzt (0.8.2 hängte sie an sein Release,
-spätere Releases verlinken den Ordner). Legen Sie
+`EasyPDM_A3/A2/A1_Landscape.slddrt` (Blattformat) und `.drwdot` (Zeichnungsvorlage); in diesem
+Ordner liegt das aktuelle Blatt. Legen Sie
 sie in einen beliebigen Ordner, tragen Sie ihn unter Extras → Optionen → Dateipositionen ein
 (Blattformate und Dokumentvorlagen) und beginnen Sie Zeichnungen mit der Vorlage; Schritt 3
 unten ist derselbe. Das Makro dient dazu, sie selbst zu erzeugen, z. B. nach einer Änderung an
