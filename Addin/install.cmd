@@ -13,6 +13,6 @@ if errorlevel 1 (
   pause
   exit /b 1
 )
-echo EasyPDM add-in registered. Start SOLIDWORKS: the EasyPDM menu and toolbar appear,
+echo EasyPDM add-in registered. Start SOLIDWORKS: the EasyPDM tab appears in the CommandManager,
 echo or tick EasyPDM under Tools ^> Add-Ins.
 pause
