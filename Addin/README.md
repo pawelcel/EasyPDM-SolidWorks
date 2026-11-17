@@ -51,5 +51,7 @@ Icons are drawn at start-up into `%LOCALAPPDATA%\EasyPDM\SolidWorks`.
 
 ## Status
 
-The tab, menu and the four macro commands ran on SOLIDWORKS 2026 (2026-11-17). The
-document panel, Lock and the outdated-component check are built, not yet run on SOLIDWORKS.
+Run on SOLIDWORKS 2024 SP5 (2026-11-17): the tab and menu, Upload, Download, Log in/out with
+the browser sign-in, Lock, the document panel for parts and assemblies, and the language
+following SOLIDWORKS. The refusal of an Upload built on an outdated component is built, not
+yet seen on SOLIDWORKS.

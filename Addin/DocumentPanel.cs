@@ -292,12 +292,15 @@ namespace EasyPDM.SolidWorksAddin
                     var local = Api.Obj(row.Server, "localVersion");
                     var here = Api.Str(local, "revisionLabel") ?? row.LocalRevision;
                     var there = Api.Str(current, "revisionLabel");
-                    var text = row.Quantity == 1 ? row.Label : row.Label + " ×" + row.Quantity;
+                    // The state's symbol leads, so it shows however narrow the panel is; its
+                    // words come last.
+                    var state = StateText(row.State);
+                    var text = state.Substring(0, 1) + " " + (row.Quantity == 1 ? row.Label : row.Label + " ×" + row.Quantity);
                     var revisions = new List<string>();
                     if (!string.IsNullOrEmpty(here)) revisions.Add(T("here {0}", here));
                     if (!string.IsNullOrEmpty(there)) revisions.Add(T("EasyPDM {0}", there));
                     if (revisions.Count > 0) text += "  (" + string.Join(", ", revisions) + ")";
-                    text += "   " + StateText(row.State);
+                    text += "  " + state.Substring(1).Trim();
                     if (row.LockedBy != null) text += "  🔒 " + row.LockedBy;
                     var node = new TreeNode(text);
                     if (row.State == CadState.Outdated) node.ForeColor = Warning;
