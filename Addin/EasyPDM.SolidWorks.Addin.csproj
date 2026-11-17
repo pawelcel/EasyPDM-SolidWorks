@@ -24,6 +24,9 @@
     <PackageReference Include="SolidWorks.Interop.swconst" Version="32.1.0" PrivateAssets="all" />
     <PackageReference Include="SolidWorks.Interop.swpublished" Version="32.1.0" PrivateAssets="all" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <!-- JavaScriptSerializer: JSON without shipping a library next to the add-in. -->
+    <Reference Include="System.Web.Extensions" />
   </ItemGroup>
 
   <!-- PackageReference has no EmbedInteropTypes switch; set it on the resolved references. -->

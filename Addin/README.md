@@ -1,10 +1,27 @@
 # EasyPDM add-in for SOLIDWORKS
 
-An **EasyPDM** tab, menu and toolbar in SOLIDWORKS with **Upload**, **Download**, **Log in** and
-**Log out**. The commands run the EasyPDM macros themselves (`EasyPDMUpload.swp`,
-`EasyPDMDownload.swp`) through SOLIDWORKS' `RunMacro2`, so they behave exactly like the
-macros; **Log in** is the Upload macro's `LoginInBrowser` (approve the sign-in in the browser),
-**Log out** its `Logout`.
+An **EasyPDM** tab in the CommandManager (parts, assemblies, drawings), a **Tools → EasyPDM**
+menu and the **EasyPDM document panel** in the Task Pane.
+
+| Command | What it does |
+|---|---|
+| **Upload** | Runs the Upload macro (`EasyPDMUpload.swp`, `main`). Refused first when the document, or a component of the assembly, is older than its file in EasyPDM: download the newest, then upload. |
+| **Download** | Runs the Download macro (`EasyPDMDownload.swp`, `main`). |
+| **Lock** | Locks the active document's item for editing, or releases your lock: pressed while you hold the lock, greyed out for a released item or someone else's lock. |
+| **Log in/out** | Logs in (the Upload macro's `LoginInBrowser`, approved in the browser) or out (`Logout`); pressed while you are signed in. |
+| **Panel** | Opens the document panel. |
+
+The **document panel** shows who is signed in and to which server, the active document's item
+(record, name, revision, status, who holds the lock) with Refresh, Open in browser, Lock for
+editing / Release lock, Upload and Log in / Log out, and for an assembly the tree of its
+components, each marked as the newest file in EasyPDM, changed here, not in EasyPDM yet, or
+with a newer file in EasyPDM (with who uploaded it and when, in its tooltip). It follows the
+active document.
+
+The add-in uses the login and server address the macros keep in the registry, so signing in
+once covers both. The outdated-component check needs an EasyPDM 0.9 server, and recognises a
+file after SOLIDWORKS saves it again unchanged by the version stamp the Upload macro writes into
+it (`EasyPDM_ContentVersion`); files uploaded by older macros are recognised by their content.
 
 ## Installing
 
@@ -28,8 +45,10 @@ A .NET Framework 4.8 class library (what SOLIDWORKS loads), COM-visible, impleme
 embedded, so the add-in ships none of them and binds to the installed SOLIDWORKS. It builds on
 Linux too (`dotnet build -c Release`), which is how the release workflow builds it.
 
+Texts are in English, Polish and German, by the Windows display language, as in the macros.
 Icons are drawn at start-up into `%LOCALAPPDATA%\EasyPDM\SolidWorks`.
 
 ## Status
 
-Built, not yet run on SOLIDWORKS.
+The tab, menu and the four macro commands ran on SOLIDWORKS 2026 (2026-11-17). The
+document panel, Lock and the outdated-component check are built, not yet run on SOLIDWORKS.
