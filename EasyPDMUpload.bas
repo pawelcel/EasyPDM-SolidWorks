@@ -161,7 +161,7 @@ Private Const SW_CUSTOM_INFO_TEXT As Long = 30              ' swCustomInfoType_e
 Private Const SW_CUSTOM_PROPERTY_REPLACE As Long = 2        ' swCustomPropertyAddOption_e.swCustomPropertyReplaceValue
 ' Bumped by hand on every change and written into the first log line, so a log shows at once
 ' whether the latest macro was imported or an older copy ran (happened twice in testing).
-Private Const MACRO_REVISION As String = "2026-11-17.1"
+Private Const MACRO_REVISION As String = "2026-11-17.2"
 Private Const SW_SAVE_AS_SILENT As Long = 1                 ' swSaveAsOptions_e.swSaveAsOptions_Silent -- UNVERIFIED against a
                                                              ' live SolidWorks install, confirm on first real test (see
                                                              ' UploadStepAttachment).
@@ -1858,7 +1858,14 @@ Function EnsureLoggedIn() As Boolean
         End If
     End If
 
-    EnsureLoggedIn = PromptLogin()
+    ' The browser first; the login and password only for a server before 0.9.
+    Dim browserResult As Long
+    browserResult = BrowserLogin()
+    If browserResult = -1 Then
+        EnsureLoggedIn = PromptLogin()
+    Else
+        EnsureLoggedIn = (browserResult = 1)
+    End If
 End Function
 
 Private Function PromptLogin() As Boolean
@@ -4878,9 +4885,19 @@ End Function
 ' .swp, procedure LoginInBrowser. A VBA macro cannot wait in the background while a message is
 ' open, so it asks to click OK once the sign-in is allowed, then checks for a few seconds.
 Sub LoginInBrowser()
+    If BrowserLogin() = -1 Then MsgBoxFront T("BrowserLoginOldServer"), vbExclamation, T("AppTitle")
+End Sub
+
+' The sign-in through the browser (EasyPDM 0.9): asks for the server address, opens EasyPDM
+' with a code, waits until the person allowed it there, and stores this macro's token.
+' 1 = signed in, 0 = cancelled or failed (already said why), -1 = a server before 0.9, which
+' has no browser sign-in. Used by LoginInBrowser and by EnsureLoggedIn, so a missing or
+' expired login is renewed in the browser, not with a password typed into SolidWorks.
+Function BrowserLogin() As Long
+    BrowserLogin = 0
     Dim server As String
     server = InputBox(T("BrowserLoginServer"), T("AppTitle"), GetBaseUrl())
-    If Trim(server) = "" Then Exit Sub
+    If Trim(server) = "" Then Exit Function
     server = Trim(server)
     If Right(server, 1) = "/" Then server = Left(server, Len(server) - 1)
     If InStr(server, "://") = 0 Then server = "http://" & server
@@ -4894,13 +4911,15 @@ Sub LoginInBrowser()
     http.send "{""client"":" & JsonStr("EasyPDM for SolidWorks") & "}"
     On Error GoTo 0
     LogLine "POST /auth/device/start -> " & http.Status
-    If http.Status = 404 Then
-        MsgBoxFront T("BrowserLoginOldServer"), vbExclamation, T("AppTitle")
-        Exit Sub
+    ' A server before 0.9 has no such route: 404, or 401 where its login check answers
+    ' before routing (seen locally). From 0.9 the route needs no login, so 401 means old.
+    If http.Status = 404 Or http.Status = 401 Then
+        BrowserLogin = -1
+        Exit Function
     End If
     If http.Status <> 200 Then
         MsgBoxFront T("LoginFailedPrefix") & http.responseText, vbExclamation, T("AppTitle")
-        Exit Sub
+        Exit Function
     End If
 
     Dim start As Object, deviceCode As String, userCode As String
@@ -4911,7 +4930,7 @@ Sub LoginInBrowser()
 
     Dim httpStatus As Long, i As Long
     Do
-        If MsgBoxFront(Replace(T("BrowserLoginWait"), "{code}", userCode), vbOKCancel + vbInformation, T("AppTitle")) <> vbOK Then Exit Sub
+        If MsgBoxFront(Replace(T("BrowserLoginWait"), "{code}", userCode), vbOKCancel + vbInformation, T("AppTitle")) <> vbOK Then Exit Function
         For i = 1 To 10
             On Error GoTo NetErr
             Set http = NewHttpRequest()
@@ -4928,7 +4947,7 @@ Sub LoginInBrowser()
 
     If httpStatus <> 200 Then
         MsgBoxFront T("LoginFailedPrefix") & http.responseText, vbExclamation, T("AppTitle")
-        Exit Sub
+        Exit Function
     End If
     Dim user As Object, displayName As String
     Set user = JsonParse(http.responseText)
@@ -4937,10 +4956,11 @@ Sub LoginInBrowser()
     SetSessionToken JsonGetString(user, "sessionToken", "")
     SetSavedDisplayName displayName
     MsgBoxFront Replace(T("BrowserLoginDone"), "{name}", displayName), vbInformation, T("AppTitle")
-    Exit Sub
+    BrowserLogin = 1
+    Exit Function
 NetErr:
     MsgBoxFront T("NoConnectionPrefix") & server & ": " & Err.Description, vbExclamation, T("AppTitle")
-End Sub
+End Function
 
 Sub Logout()
     ApiLogout

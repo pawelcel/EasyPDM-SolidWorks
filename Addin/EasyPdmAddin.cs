@@ -237,11 +237,16 @@ namespace EasyPDM.SolidWorksAddin
         /// 0.9, which have no browser sign-in. False when the person cancelled the sign-in.
         private bool EnsureSignedIn()
         {
-            if (TokenWorks() != false) return true;
+            var works = TokenWorks();
+            Log.Line("Signed in: token " + (Settings.SignedIn ? "stored" : "none") + ", accepted: " + (works?.ToString() ?? "server not reached"));
+            if (works != false) return true;
             var support = BrowserLoginSupported();
+            Log.Line("Browser sign-in supported: " + (support?.ToString() ?? "server not reached"));
             if (support == false) return true; // a server before 0.9: the macro asks for a password
             RunMacro("EasyPDMUpload.swp", "EasyPDMUpload", "LoginInBrowser");
-            return TokenWorks() != false;
+            works = TokenWorks();
+            Log.Line("After the browser sign-in, accepted: " + (works?.ToString() ?? "server not reached"));
+            return works != false;
         }
 
         /// True when the stored token is accepted, false when there is none or the server refuses
@@ -404,6 +409,7 @@ namespace EasyPDM.SolidWorksAddin
                 return;
             }
             int error;
+            Log.Line("Run " + file + " " + (found ?? module) + "." + procedure);
             var ok = _sw.RunMacro2(path, found ?? module, procedure, (int)swRunMacroOption_e.swRunMacroUnloadAfterRun, out error);
             if (!ok)
                 Tell("EasyPDM: " + T("The macro {0} ({1}) did not run, error {2}.", file, (found ?? module) + "." + procedure, error)

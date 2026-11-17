@@ -52,6 +52,22 @@ namespace EasyPDM.SolidWorksAddin
         public static bool SignedIn => Token.Length > 0;
     }
 
+    /// %TEMP%\EasyPDM_addin.log, next to the macros' own logs: what the add-in asked the server
+    /// and what it decided, for when something does not work on a computer nobody here can see.
+    internal static class Log
+    {
+        private static readonly string File = Path.Combine(Path.GetTempPath(), "EasyPDM_addin.log");
+
+        public static void Line(string message)
+        {
+            try
+            {
+                System.IO.File.AppendAllText(File, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "  " + message + Environment.NewLine);
+            }
+            catch { /* a log must never stop the add-in */ }
+        }
+    }
+
     internal sealed class ApiResult
     {
         public int Status;
@@ -91,13 +107,24 @@ namespace EasyPDM.SolidWorksAddin
             }
             try
             {
-                using (var response = (HttpWebResponse)request.GetResponse())
-                    return Read(response);
+                ApiResult result;
+                try
+                {
+                    using (var response = (HttpWebResponse)request.GetResponse())
+                        result = Read(response);
+                }
+                catch (WebException e) when (e.Response is HttpWebResponse response)
+                {
+                    using (response)
+                        result = Read(response);
+                }
+                Log.Line(method + " " + path + " -> " + result.Status);
+                return result;
             }
-            catch (WebException e) when (e.Response is HttpWebResponse response)
+            catch (Exception e)
             {
-                using (response)
-                    return Read(response);
+                Log.Line(method + " " + Settings.BaseUrl + path + " -> NO CONNECTION: " + e.Message);
+                throw;
             }
         }
 

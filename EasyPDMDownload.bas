@@ -195,6 +195,9 @@ Private Function T_PL(ByVal key As String) As String
         Case "PromptPassword": T_PL = "Haslo (UWAGA: to pole nie maskuje wpisywanych znakow):"
         Case "LoggedInAsPrefix": T_PL = "Zalogowano jako "
         Case "AppTitle": T_PL = "EasyPDM"
+        Case "BrowserLoginServer": T_PL = "Adres serwera EasyPDM:"
+        Case "BrowserLoginWait": T_PL = "EasyPDM otworzyl sie w przegladarce. Sprawdz, czy pokazuje kod {code}, kliknij tam Zezwol, a potem OK tutaj."
+        Case "BrowserLoginDone": T_PL = "Zalogowano do EasyPDM jako {name}."
         Case "LoginFailedPrefix": T_PL = "Logowanie nie powiodlo sie: "
         Case "LoginFailedNoSession": T_PL = "Logowanie nie powiodlo sie -- serwer nie zwrocil sesji."
         Case "ServerErrorPrefix": T_PL = "Blad serwera ("
@@ -242,6 +245,9 @@ Private Function T_EN(ByVal key As String) As String
         Case "PromptPassword": T_EN = "Password (NOTE: this field does not mask typed characters):"
         Case "LoggedInAsPrefix": T_EN = "Logged in as "
         Case "AppTitle": T_EN = "EasyPDM"
+        Case "BrowserLoginServer": T_EN = "EasyPDM server address:"
+        Case "BrowserLoginWait": T_EN = "EasyPDM opened in the browser. Check that it shows the code {code}, click Allow there, then OK here."
+        Case "BrowserLoginDone": T_EN = "Logged in to EasyPDM as {name}."
         Case "LoginFailedPrefix": T_EN = "Login failed: "
         Case "LoginFailedNoSession": T_EN = "Login failed -- the server did not return a session."
         Case "ServerErrorPrefix": T_EN = "Server error ("
@@ -289,6 +295,9 @@ Private Function T_DE(ByVal key As String) As String
         Case "PromptPassword": T_DE = "Passwort (HINWEIS: Dieses Feld maskiert die eingegebenen Zeichen nicht):"
         Case "LoggedInAsPrefix": T_DE = "Angemeldet als "
         Case "AppTitle": T_DE = "EasyPDM"
+        Case "BrowserLoginServer": T_DE = "Adresse des EasyPDM-Servers:"
+        Case "BrowserLoginWait": T_DE = "EasyPDM wurde im Browser geoeffnet. Pruefen Sie, ob der Code {code} angezeigt wird, klicken Sie dort Erlauben und dann hier OK."
+        Case "BrowserLoginDone": T_DE = "Bei EasyPDM angemeldet als {name}."
         Case "LoginFailedPrefix": T_DE = "Anmeldung fehlgeschlagen: "
         Case "LoginFailedNoSession": T_DE = "Anmeldung fehlgeschlagen -- der Server hat keine Sitzung zurueckgegeben."
         Case "ServerErrorPrefix": T_DE = "Serverfehler ("
@@ -1148,7 +1157,14 @@ Function EnsureLoggedIn() As Boolean
         End If
     End If
 
-    EnsureLoggedIn = PromptLogin()
+    ' The browser first; the login and password only for a server before 0.9.
+    Dim browserResult As Long
+    browserResult = BrowserLogin()
+    If browserResult = -1 Then
+        EnsureLoggedIn = PromptLogin()
+    Else
+        EnsureLoggedIn = (browserResult = 1)
+    End If
 End Function
 
 Private Function PromptLogin() As Boolean
@@ -1779,6 +1795,79 @@ Failed:
 End Sub
 
 ' Separate Sub -- can be bound to your own toolbar button/shortcut to log out of EasyPDM.
+' The sign-in through the browser (EasyPDM 0.9), the same as BrowserLogin in
+' EasyPDMUpload.bas (copied, as the macros share no code): 1 = signed in, 0 = cancelled or
+' failed, -1 = a server before 0.9, which has no browser sign-in -- then EnsureLoggedIn asks
+' for the login and password as before.
+Function BrowserLogin() As Long
+    BrowserLogin = 0
+    Dim server As String
+    server = InputBox(T("BrowserLoginServer"), T("AppTitle"), GetBaseUrl())
+    If Trim(server) = "" Then Exit Function
+    server = Trim(server)
+    If Right(server, 1) = "/" Then server = Left(server, Len(server) - 1)
+    If InStr(server, "://") = 0 Then server = "http://" & server
+    If LCase(Right(server, 4)) <> "/api" Then server = server & "/api"
+
+    Dim http As Object
+    On Error GoTo NetErr
+    Set http = NewHttpRequest()
+    http.Open "POST", server & "/auth/device/start", False
+    http.setRequestHeader "Content-Type", "application/json"
+    http.send "{""client"":" & JsonStr("EasyPDM for SolidWorks") & "}"
+    On Error GoTo 0
+    LogLine "POST /auth/device/start -> " & http.Status
+    ' A server before 0.9 has no such route: 404, or 401 where its login check answers
+    ' before routing (seen locally). From 0.9 the route needs no login, so 401 means old.
+    If http.Status = 404 Or http.Status = 401 Then
+        BrowserLogin = -1
+        Exit Function
+    End If
+    If http.Status <> 200 Then
+        MsgBoxFront T("LoginFailedPrefix") & http.responseText, vbExclamation, T("AppTitle")
+        Exit Function
+    End If
+
+    Dim start As Object, deviceCode As String, userCode As String
+    Set start = JsonParse(http.responseText)
+    deviceCode = JsonGetString(start, "deviceCode", "")
+    userCode = JsonGetString(start, "userCode", "")
+    OpenUrlInBrowser Left(server, Len(server) - 4) & JsonGetString(start, "verificationPath", "")
+
+    Dim httpStatus As Long, i As Long
+    Do
+        If MsgBoxFront(Replace(T("BrowserLoginWait"), "{code}", userCode), vbOKCancel + vbInformation, T("AppTitle")) <> vbOK Then Exit Function
+        For i = 1 To 10
+            On Error GoTo NetErr
+            Set http = NewHttpRequest()
+            http.Open "POST", server & "/auth/device/token", False
+            http.setRequestHeader "Content-Type", "application/json"
+            http.send "{""deviceCode"":" & JsonStr(deviceCode) & "}"
+            On Error GoTo 0
+            httpStatus = http.Status
+            If httpStatus <> 202 Then Exit For
+            Sleep 1000
+        Next i
+    Loop While httpStatus = 202
+    LogLine "POST /auth/device/token -> " & httpStatus
+
+    If httpStatus <> 200 Then
+        MsgBoxFront T("LoginFailedPrefix") & http.responseText, vbExclamation, T("AppTitle")
+        Exit Function
+    End If
+    Dim user As Object, displayName As String
+    Set user = JsonParse(http.responseText)
+    displayName = JsonGetString(user, "displayName", JsonGetString(user, "username", ""))
+    SetBaseUrl server
+    SetSessionToken JsonGetString(user, "sessionToken", "")
+    SetSavedDisplayName displayName
+    MsgBoxFront Replace(T("BrowserLoginDone"), "{name}", displayName), vbInformation, T("AppTitle")
+    BrowserLogin = 1
+    Exit Function
+NetErr:
+    MsgBoxFront T("NoConnectionPrefix") & server & ": " & Err.Description, vbExclamation, T("AppTitle")
+End Function
+
 Sub Logout()
     ApiLogout
     MsgBoxFront T("LoggedOutMessage"), vbInformation, T("AppTitle")
