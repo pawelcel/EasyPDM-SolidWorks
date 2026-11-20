@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/easypdm-logo.svg" alt="EasyPDM logo" width="110"></p>
+
 # EasyPDM für SolidWorks
 
 [English](README.md) | [Polski](README.pl.md) | **Deutsch**
