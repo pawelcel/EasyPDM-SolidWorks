@@ -4,6 +4,8 @@
 
 [![Postaw kawę na buycoffee.to](https://img.shields.io/badge/☕_Postaw_kawę-buycoffee.to-FFDD00?style=for-the-badge)](https://buycoffee.to/easypdm)
 
+[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/dokumentacja-wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)
+
 Część [EasyPDM](https://github.com/pawelcel/EasyPDM) (małego PDM-u na własnym serwerze) dla
 SolidWorksa: dodatek z zakładką EasyPDM we wstążce ([`Addin/`](Addin/README.md)), makra Upload i
 Download, które uruchamia, oraz arkusz rysunkowy EasyPDM. Do wersji 0.9 były w repozytorium

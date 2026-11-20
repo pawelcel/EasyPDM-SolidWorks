@@ -4,6 +4,8 @@
 
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="136">](https://buymeacoffee.com/easypdm)
 
+[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/docs-wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)
+
 The SolidWorks side of [EasyPDM](https://github.com/pawelcel/EasyPDM), a small, self-hosted PDM:
 an add-in with an EasyPDM tab in the CommandManager ([`Addin/`](Addin/README.md)), the Upload and
 Download macros it runs, and the EasyPDM drawing sheet. Until 0.9 they lived in the EasyPDM
