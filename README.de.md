@@ -6,7 +6,7 @@
 
 [<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="136">](https://buymeacoffee.com/easypdm)
 
-[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/Doku-Wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)
+[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks-Addon?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks-Addon)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks-Addon/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/Doku-Wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/wiki)
 
 Der SolidWorks-Teil von [EasyPDM](https://github.com/pawelcel/EasyPDM), einem kleinen,
 selbst gehosteten PDM: ein Add-in mit einer EasyPDM-Registerkarte im CommandManager
@@ -18,10 +18,10 @@ ihre Geschichte ist mitgekommen.
 
 ![Ein Teil mit dem EasyPDM-Dokumentbereich im Task Pane](docs/images/panel-part.png)
 
-**Add-in installieren:** das neueste [Release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
+**Add-in installieren:** das neueste [Release](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases)
 herunterladen (Zip und beide `.swp`-Makros), in einen bleibenden Ordner entpacken, `install.cmd`
 als Administrator ausführen und SOLIDWORKS starten — Details in [`Addin/README.md`](Addin/README.md) (auf Englisch).
-**Schritt für Schritt, mit Screenshots: [das Wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)** (auf Englisch).
+**Schritt für Schritt, mit Screenshots: [das Wiki](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/wiki)** (auf Englisch).
 
 ## Die Makros
 
@@ -313,7 +313,7 @@ bei der Anmeldung automatisch gespeichert — gemeinsam für beide Makros.
 
 [`Addin/`](Addin/README.md) ist ein SOLIDWORKS-Add-in mit einer EasyPDM-Registerkarte (Upload,
 Download, Sperre, Anmeldung, Bereich), das diese Makros ausführt, mit eigenem Dokumentbereich
-und eigener Prüfung veralteter Komponenten; es liegt jedem [Release](https://github.com/pawelcel/EasyPDM-SolidWorks/releases) bei.
+und eigener Prüfung veralteter Komponenten; es liegt jedem [Release](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases) bei.
 Ohne das Add-in lassen sich die vier Makrobefehle von Hand auf eine Symbolleiste legen:
 
 ### Eine EasyPDM-Symbolleiste
@@ -465,7 +465,7 @@ speichert es als Blattformat (`.slddrt`) und Zeichnungsvorlage (`.drwdot`) in
 Die Schriftfeldfelder sind Notizen, die mit den benutzerdefinierten Eigenschaften der
 Zeichnung verknüpft sind (`$PRP:"pdm_drawn_by"`, `$PRP:"pdm_label_drawn_by"`, …); Maßstab und
 Blattnummer nutzen die eigenen Blatteigenschaften von SolidWorks. Das Makro wird von
-`tools/build_templates.py` in [pawelcel/EasyPDM-FreeCAD](https://github.com/pawelcel/EasyPDM-FreeCAD) erzeugt (`--solidworks PFAD-ZU-DIESEM-REPOSITORY`) — ändern Sie das Skript, nicht die
+`tools/build_templates.py` in [pawelcel/EasyPDM-FreeCAD-Addon](https://github.com/pawelcel/EasyPDM-FreeCAD-Addon) erzeugt (`--solidworks PFAD-ZU-DIESEM-REPOSITORY`) — ändern Sie das Skript, nicht die
 `.bas`. Jeder Lauf schreibt ein Protokoll nach `%TEMP%\EasyPDM_sheetformat.log`; die erste Zeile
 nennt die Makroversion.
 

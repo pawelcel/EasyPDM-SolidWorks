@@ -6,7 +6,7 @@
 
 [![Postaw kawę na buycoffee.to](https://img.shields.io/badge/☕_Postaw_kawę-buycoffee.to-FFDD00?style=for-the-badge)](https://buycoffee.to/easypdm)
 
-[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/dokumentacja-wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)
+[![Release](https://img.shields.io/github/v/release/pawelcel/EasyPDM-SolidWorks-Addon?label=release)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases/latest) [![License: MIT](https://img.shields.io/github/license/pawelcel/EasyPDM-SolidWorks-Addon)](LICENSE) [![Tests](https://img.shields.io/github/actions/workflow/status/pawelcel/EasyPDM-SolidWorks-Addon/check.yml?branch=main&label=tests)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/actions/workflows/check.yml) [![Wiki](https://img.shields.io/badge/dokumentacja-wiki-blue)](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/wiki)
 
 Część [EasyPDM](https://github.com/pawelcel/EasyPDM) (małego PDM-u na własnym serwerze) dla
 SolidWorksa: dodatek z zakładką EasyPDM we wstążce ([`Addin/`](Addin/README.md)), makra Upload i
@@ -17,10 +17,10 @@ EasyPDM, w `EasyPDM.SolidWorks/`; przeniesiono je razem z historią.
 
 ![Część z panelem dokumentu EasyPDM w Task Pane](docs/images/panel-part.png)
 
-**Instalacja dodatku:** pobierz najnowsze [wydanie](https://github.com/pawelcel/EasyPDM-SolidWorks/releases)
+**Instalacja dodatku:** pobierz najnowsze [wydanie](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases)
 (zip i oba makra `.swp`), rozpakuj je do jednego stałego folderu, uruchom `install.cmd` jako
 administrator i włącz SOLIDWORKS — szczegóły w [`Addin/README.md`](Addin/README.md) (po angielsku).
-**Krok po kroku, ze zrzutami ekranu: [wiki](https://github.com/pawelcel/EasyPDM-SolidWorks/wiki)** (po angielsku).
+**Krok po kroku, ze zrzutami ekranu: [wiki](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/wiki)** (po angielsku).
 
 ## Makra
 
@@ -285,7 +285,7 @@ podaniu przy logowaniu — wspólnie dla obu makr.
 
 [`Addin/`](Addin/README.md) to dodatek do SOLIDWORKS z zakładką EasyPDM (Upload, Download,
 Blokada, Logowanie, Panel), który uruchamia te makra, z własnym panelem dokumentu i
-sprawdzaniem nieaktualnych komponentów; jest w każdym [wydaniu](https://github.com/pawelcel/EasyPDM-SolidWorks/releases).
+sprawdzaniem nieaktualnych komponentów; jest w każdym [wydaniu](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/releases).
 Bez niego cztery polecenia makr można ułożyć na pasku ręcznie:
 
 ### Pasek narzędzi EasyPDM
@@ -421,7 +421,7 @@ rysunku (`.drwdot`) w `Dokumenty\EasyPDM\SolidWorks`.
 
 Pola tabelki to notatki powiązane z właściwościami rysunku (`$PRP:"pdm_drawn_by"`,
 `$PRP:"pdm_label_drawn_by"`, …); skala i numer arkusza korzystają z właściwości arkusza
-SolidWorks. Makro generuje `tools/build_templates.py` w [pawelcel/EasyPDM-FreeCAD](https://github.com/pawelcel/EasyPDM-FreeCAD) (`--solidworks ŚCIEŻKA-DO-TEGO-REPOZYTORIUM`) — zmieniaj skrypt,
+SolidWorks. Makro generuje `tools/build_templates.py` w [pawelcel/EasyPDM-FreeCAD-Addon](https://github.com/pawelcel/EasyPDM-FreeCAD-Addon) (`--solidworks ŚCIEŻKA-DO-TEGO-REPOZYTORIUM`) — zmieniaj skrypt,
 nie `.bas`. Każde uruchomienie zapisuje log w `%TEMP%\EasyPDM_sheetformat.log`; pierwsza linia
 podaje wersję makra.
 

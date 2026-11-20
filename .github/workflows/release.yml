@@ -30,10 +30,10 @@ jobs:
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           dotnet build Addin -c Release -p:Version="$VERSION"
-          mkdir -p out/EasyPDM-SolidWorks
+          mkdir -p out/EasyPDM-SolidWorks-Addon
           cp Addin/bin/Release/net48/EasyPDM.SolidWorks.Addin.dll Addin/install.cmd Addin/uninstall.cmd \
-             Addin/README.md EasyPDMUpload.bas EasyPDMDownload.bas LICENSE out/EasyPDM-SolidWorks/
-          (cd out && zip -q -r "../EasyPDM_SolidWorks_Addin_v${VERSION}.zip" EasyPDM-SolidWorks)
+             Addin/README.md EasyPDMUpload.bas EasyPDMDownload.bas LICENSE out/EasyPDM-SolidWorks-Addon/
+          (cd out && zip -q -r "../EasyPDM_SolidWorks_Addin_v${VERSION}.zip" EasyPDM-SolidWorks-Addon)
       - name: Release notes from CHANGELOG.md
         run: |
           VERSION="${GITHUB_REF_NAME#v}"

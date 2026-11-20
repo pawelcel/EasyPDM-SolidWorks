@@ -10,11 +10,11 @@ and the drawing sheet were released with EasyPDM itself; see the
 
 **In short:** the first release of EasyPDM for SolidWorks on its own, and the first with an add-in. An EasyPDM tab in the CommandManager with Upload, Download, Lock and Log in/out; a document panel in the Task Pane with the item's record, revision, status and lock, and for an assembly the tree of its components marked current or outdated; an Upload that refuses work built on outdated files; signing in through the browser, so SOLIDWORKS never sees your password; English, Polish and German, following SOLIDWORKS' language.
 
-![The EasyPDM tab in SOLIDWORKS: Upload, Download, Lock (pressed: you hold the lock) and Log in/out (pressed: signed in)](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks/v0.9.0/docs/images/ribbon.png)
+![The EasyPDM tab in SOLIDWORKS: Upload, Download, Lock (pressed: you hold the lock) and Log in/out (pressed: signed in)](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks-Addon/v0.9.0/docs/images/ribbon.png)
 
-![A part with the EasyPDM document panel in the Task Pane: its record, revision, status and who holds the lock](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks/v0.9.0/docs/images/panel-part.png)
+![A part with the EasyPDM document panel in the Task Pane: its record, revision, status and who holds the lock](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks-Addon/v0.9.0/docs/images/panel-part.png)
 
-![The document panel for an assembly not uploaded yet: its component, twice, is the newest file in EasyPDM](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks/v0.9.0/docs/images/panel-assembly-closeup.png)
+![The document panel for an assembly not uploaded yet: its component, twice, is the newest file in EasyPDM](https://raw.githubusercontent.com/pawelcel/EasyPDM-SolidWorks-Addon/v0.9.0/docs/images/panel-assembly-closeup.png)
 
 **Install** (Windows, SOLIDWORKS 2024 SP5 tested; needs an [EasyPDM 0.9](https://github.com/pawelcel/EasyPDM/releases) server):
 
@@ -25,7 +25,7 @@ and the drawing sheet were released with EasyPDM itself; see the
 
 Updating from a test build: close SOLIDWORKS, replace the files in the same folder and run `install.cmd` again. `uninstall.cmd` (as administrator) removes the add-in.
 
-The EasyPDM drawing sheet formats and templates are not attached; take them from [`templates/` at this release](https://github.com/pawelcel/EasyPDM-SolidWorks/tree/v0.9.0/templates). Until now the SolidWorks macros and sheets were released with EasyPDM itself, up to [EasyPDM 0.9.0](https://github.com/pawelcel/EasyPDM/blob/main/CHANGELOG.md).
+The EasyPDM drawing sheet formats and templates are not attached; take them from [`templates/` at this release](https://github.com/pawelcel/EasyPDM-SolidWorks-Addon/tree/v0.9.0/templates). Until now the SolidWorks macros and sheets were released with EasyPDM itself, up to [EasyPDM 0.9.0](https://github.com/pawelcel/EasyPDM/blob/main/CHANGELOG.md).
 
 ### Added
 - **The EasyPDM add-in**: an EasyPDM tab in the CommandManager for parts, assemblies and drawings, and a Tools → EasyPDM menu. Upload, Download and Log in/out run the EasyPDM macros, compiled next to the add-in, so they behave exactly like the macros; the add-in finds the macro's module by itself, whatever it was named when the macro was compiled.

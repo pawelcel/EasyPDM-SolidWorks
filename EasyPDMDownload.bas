@@ -5,14 +5,14 @@ Option Explicit
 ' EasyPDMDownload -- SolidWorks macro that downloads a Part/Assembly from EasyPDM and
 ' opens it.
 '
-' This is the COUNTERPART of EasyPDM-FreeCAD/freecad/EasyPDM/download.py, not a 1:1 port -- see
+' This is the COUNTERPART of EasyPDM-FreeCAD-Addon/freecad/EasyPDM/download.py, not a 1:1 port -- see
 ' EasyPDMUpload.bas's header for the general reasons (own minimal JSON, no UserForm
 ' anywhere -- VBA UserForms are separate binary resources, not embeddable in a plain .bas
 ' text file).
 '
 ' This file is fully SELF-CONTAINED (does not depend on EasyPDMUpload.bas being present in
 ' the same VBA project) -- it duplicates the login/JSON/HTTP/browser-ticket helpers rather
-' than importing them, the same way EasyPDM-FreeCAD/freecad/EasyPDM/download.py duplicates
+' than importing them, the same way EasyPDM-FreeCAD-Addon/freecad/EasyPDM/download.py duplicates
 ' rather than imports from upload.py (FreeCAD). The API address, session token and
 ' download folder are shared with EasyPDMUpload.bas through the SAME Windows registry keys
 ' (identical constants below) -- logging in from one macro is enough for both.
@@ -864,7 +864,7 @@ End Function
 
 ' ============================================================================
 ' Browser ticket flow -- lets the web app pick WHICH item to download instead of a native
-' number-entry InputBox, exactly like EasyPDM-FreeCAD/freecad/EasyPDM/download.py. Duplicated
+' number-entry InputBox, exactly like EasyPDM-FreeCAD-Addon/freecad/EasyPDM/download.py. Duplicated
 ' from EasyPDMUpload.bas (see file header for why this file does not import from it) --
 ' BuildBrowserDownloadUrl differs (mode=download, no "name" hint), WaitForTicket/NewGuid/
 ' UrlEncode/OpenUrlInBrowser are identical copies.
@@ -1709,7 +1709,7 @@ Sub main()
     End If
 
     ' Which item to download is picked in the browser, not a native InputBox -- exactly
-    ' like EasyPDM-FreeCAD/freecad/EasyPDM/download.py (see BuildBrowserDownloadUrl/
+    ' like EasyPDM-FreeCAD-Addon/freecad/EasyPDM/download.py (see BuildBrowserDownloadUrl/
     ' WaitForTicket above).
     Dim ticket As String
     ticket = NewGuid()
